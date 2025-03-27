@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { v4 as uuidv4 } from 'uuid';
 import Layout from '@/components/Layout';
 import Button from '@/components/Button';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -170,7 +169,7 @@ export default function NewCasePage() {
 
                             {error.includes('API authentication') && (
                                 <div className="mt-2 text-sm">
-                                    Make sure you have set the TYPHOON_API_KEY and NEXT_PUBLIC_TYPHOON_API_KEY in your .env.local file.
+                                    Make sure you have set the TYPHOON_API_KEY in your server environment variables.
                                 </div>
                             )}
 
@@ -198,7 +197,7 @@ export default function NewCasePage() {
                             fullWidth
                             isLoading={isGenerating}
                             onClick={handleGenerateCase}
-                            disabled={isGenerating}
+                            isDisabled={isGenerating}
                         >
                             {isGenerating ? 'Generating...' : 'Generate Case'}
                         </Button>
@@ -207,7 +206,7 @@ export default function NewCasePage() {
                             size="lg"
                             fullWidth
                             onClick={() => router.back()}
-                            disabled={isGenerating}
+                            isDisabled={isGenerating}
                         >
                             Cancel
                         </Button>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Layout from '@/components/Layout';
@@ -12,40 +12,53 @@ import { ClueAnalysis } from '@/types/game';
 import { FiArrowLeft, FiFileText, FiUser } from 'react-icons/fi';
 
 interface CluePageProps {
-    params: {
+    params: Promise<{
         id: string;
-    };
+    }>;
 }
 
 export default function CluePage({ params }: CluePageProps) {
     const router = useRouter();
-    const { t } = useLanguage();
-    const { cases, clues, suspects, dispatch } = useGame();
+    const { t, language } = useLanguage();
+    const { state, dispatch } = useGame();
+    const { cases, clues, suspects } = state;
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [analysisResult, setAnalysisResult] = useState<ClueAnalysis | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [clueId, setClueId] = useState<string>('');
+    const examineActionDispatched = useRef(false);
 
-    // Use id directly from params - Next.js still supports this while migrating
-    const clueId = params.id;
+    // Update params.id to use state with async/await approach
+    useEffect(() => {
+        const fetchClueId = async () => {
+            setClueId((await params).id);
+        };
+        fetchClueId();
+    }, [params]);
 
     // Find the clue by ID
     const clue = clues.find(c => c.id === clueId);
 
     // Get related case and suspects
     const caseData = clue ? cases.find(c => c.id === clue.caseId) : null;
-    const relatedSuspects = clue?.relatedSuspectIds?.map(id =>
-        suspects.find(s => s.id === id)
-    ).filter(Boolean) || [];
 
     // Check if clue has been examined
     const isExamined = clue?.examined || false;
 
+    // Load saved analysis when component mounts
+    useEffect(() => {
+        if (clueId && state.gameState.clueAnalyses[clueId]) {
+            setAnalysisResult(state.gameState.clueAnalyses[clueId]);
+        }
+    }, [clueId, state.gameState.clueAnalyses]);
+
     // Mark clue as examined when first viewed
     useEffect(() => {
-        if (clue && !isExamined) {
+        if (clue && !isExamined && !examineActionDispatched.current) {
+            examineActionDispatched.current = true;
             dispatch({
                 type: 'EXAMINE_CLUE',
-                payload: { id: clue.id }
+                payload: clue.id
             });
         }
     }, [clue, dispatch, isExamined]);
@@ -73,8 +86,21 @@ export default function CluePage({ params }: CluePageProps) {
         setError(null);
 
         try {
-            const result = await analyzeClue(clue);
+            const discoveredClues = clues.filter(c => state.gameState.discoveredClues.includes(c.id));
+            const result = await analyzeClue(
+                clue, 
+                suspects, 
+                caseData!, 
+                discoveredClues, 
+                language
+            );
             setAnalysisResult(result);
+            
+            // Save the analysis to the global state
+            dispatch({
+                type: 'SAVE_CLUE_ANALYSIS',
+                payload: { clueId: clue.id, analysis: result }
+            });
         } catch (err) {
             setError(t('clue.analysis_failed'));
             console.error(err);
@@ -104,13 +130,13 @@ export default function CluePage({ params }: CluePageProps) {
                 {/* Main clue info */}
                 <div className="md:col-span-2 space-y-6">
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                        <h1 className="text-2xl font-bold mb-4">{clue.name}</h1>
+                        <h1 className="text-2xl font-bold mb-4">{clue.title}</h1>
 
                         {clue.imageUrl && (
                             <div className="mb-6 relative h-64 w-full">
                                 <Image
                                     src={clue.imageUrl}
-                                    alt={clue.name}
+                                    alt={clue.title}
                                     fill
                                     className="object-contain rounded"
                                 />
@@ -123,8 +149,8 @@ export default function CluePage({ params }: CluePageProps) {
                                 <div className="font-medium">{clue.type}</div>
                             </div>
                             <div>
-                                <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">{t('clue.condition')}</div>
-                                <div className="font-medium">{clue.condition}</div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">{t('clue.relevance')}</div>
+                                <div className="font-medium">{clue.relevance}</div>
                             </div>
                         </div>
 
@@ -136,17 +162,6 @@ export default function CluePage({ params }: CluePageProps) {
                         <div className="mb-6">
                             <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">{t('clue.location')}</div>
                             <div className="font-medium">{clue.location}</div>
-                        </div>
-
-                        <div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">{t('clue.keywords')}</div>
-                            <div className="flex flex-wrap gap-2 mt-1">
-                                {clue.keywords.map((keyword, index) => (
-                                    <span key={index} className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100 px-2 py-1 rounded-md text-sm">
-                                        {keyword}
-                                    </span>
-                                ))}
-                            </div>
                         </div>
                     </div>
 
@@ -173,22 +188,45 @@ export default function CluePage({ params }: CluePageProps) {
                                 <div>
                                     <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">{t('clue.significance')}</div>
                                     <div className="bg-indigo-50 dark:bg-indigo-900/30 p-4 rounded-md text-indigo-700 dark:text-indigo-200">
-                                        {analysisResult.significance}
+                                        {analysisResult.summary}
                                     </div>
                                 </div>
 
-                                <div>
-                                    <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">{t('clue.possibleConnections')}</div>
-                                    <div className="bg-indigo-50 dark:bg-indigo-900/30 p-4 rounded-md text-indigo-700 dark:text-indigo-200">
-                                        {analysisResult.possibleConnections}
+                                {analysisResult.connections.length > 0 && (
+                                    <div>
+                                        <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">{t('clue.connections')}</div>
+                                        <div className="bg-indigo-50 dark:bg-indigo-900/30 p-4 rounded-md text-indigo-700 dark:text-indigo-200">
+                                            {analysisResult.connections.map((connection, index) => {
+                                                const suspect = suspects.find(s => s.id === connection.suspectId);
+                                                return (
+                                                    <div key={index} className="mb-4 last:mb-0">
+                                                        <div className="font-medium mb-1">
+                                                            {suspect ? suspect.name : 'Unknown Suspect'} - {connection.connectionType}
+                                                        </div>
+                                                        <div>{connection.description}</div>
+                                                        {suspect && (
+                                                            <Button
+                                                                variant="secondary"
+                                                                size="sm"
+                                                                className="mt-1 pl-0"
+                                                                onClick={() => handleViewSuspect(suspect.id)}
+                                                            >
+                                                                <FiUser className="inline mr-1" size={14} />
+                                                                <span className="comic-text text-white">{t('suspect.view')}</span>
+                                                            </Button>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
                                     </div>
-                                </div>
+                                )}
 
                                 <div>
-                                    <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">{t('clue.questions')}</div>
+                                    <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">{t('clue.next_steps')}</div>
                                     <ul className="bg-indigo-50 dark:bg-indigo-900/30 p-4 rounded-md text-indigo-700 dark:text-indigo-200 list-disc pl-5">
-                                        {analysisResult.questionsToConsider.map((question, index) => (
-                                            <li key={index} className="mb-1">{question}</li>
+                                        {analysisResult.nextSteps.map((step, index) => (
+                                            <li key={index} className="mb-1">{step}</li>
                                         ))}
                                     </ul>
                                 </div>
@@ -212,34 +250,10 @@ export default function CluePage({ params }: CluePageProps) {
                                 variant="outline"
                                 onClick={() => router.push(`/cases/${caseData.id}`)}
                             >
-                                {t('case.view')}
+                                <span className="comic-text">{t('case.view')}</span>
                             </Button>
                         </div>
                     </div>
-
-                    {/* Related Suspects */}
-                    {relatedSuspects.length > 0 && (
-                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                            <h2 className="text-xl font-bold mb-4">{t('clue.relatedSuspects')}</h2>
-                            <div className="space-y-3">
-                                {relatedSuspects.map(suspect => (
-                                    <div key={suspect?.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                                        <div className="flex items-center">
-                                            <FiUser size={20} className="text-gray-400 mr-3" />
-                                            <span>{suspect?.name}</span>
-                                        </div>
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={() => suspect?.id && handleViewSuspect(suspect.id)}
-                                        >
-                                            {t('suspect.view')}
-                                        </Button>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
                 </div>
             </div>
         </Layout>

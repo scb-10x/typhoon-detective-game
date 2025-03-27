@@ -1,8 +1,7 @@
 'use client';
 
 import { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
-import { AppState, Case, Clue, Suspect, Interview, GameState } from '@/types/game';
-import { sampleData } from '@/lib/sampleCases';
+import { AppState, Case, Clue, Suspect, Interview, GameState, ClueAnalysis } from '@/types/game';
 import { defaultCases, defaultClues, defaultSuspects } from '@/data/defaultCases';
 import { thCases, thClues, thSuspects } from '@/data/translatedCases';
 import { useLanguage } from './LanguageContext';
@@ -20,6 +19,8 @@ const initialState: AppState = {
         interviewedSuspects: [],
         casesSolved: [],
         gameProgress: 0,
+        clueAnalyses: {},
+        suspectInterviews: {},
     },
 };
 
@@ -35,7 +36,9 @@ type ActionType =
     | { type: 'INTERVIEW_SUSPECT'; payload: string }
     | { type: 'SOLVE_CASE'; payload: string }
     | { type: 'RESET_GAME' }
-    | { type: 'LOAD_GAME'; payload: AppState };
+    | { type: 'LOAD_GAME'; payload: AppState }
+    | { type: 'SAVE_CLUE_ANALYSIS'; payload: { clueId: string, analysis: ClueAnalysis } }
+    | { type: 'SAVE_SUSPECT_INTERVIEW'; payload: { suspectId: string, conversation: {question: string, answer: string, isCustom?: boolean}[] } };
 
 // Reducer function
 function gameReducer(state: AppState, action: ActionType): AppState {
@@ -139,6 +142,30 @@ function gameReducer(state: AppState, action: ActionType): AppState {
 
         case 'LOAD_GAME':
             return action.payload;
+
+        case 'SAVE_CLUE_ANALYSIS':
+            return {
+                ...state,
+                gameState: {
+                    ...state.gameState,
+                    clueAnalyses: {
+                        ...state.gameState.clueAnalyses,
+                        [action.payload.clueId]: action.payload.analysis
+                    }
+                }
+            };
+
+        case 'SAVE_SUSPECT_INTERVIEW':
+            return {
+                ...state,
+                gameState: {
+                    ...state.gameState,
+                    suspectInterviews: {
+                        ...state.gameState.suspectInterviews,
+                        [action.payload.suspectId]: action.payload.conversation
+                    }
+                }
+            };
 
         default:
             return state;

@@ -21,9 +21,9 @@ export default function ProgressBar({
 
     // Define size-dependent styles
     const heights = {
-        sm: 'h-1.5',
-        md: 'h-2.5',
-        lg: 'h-3.5',
+        sm: 'h-2',
+        md: 'h-3',
+        lg: 'h-4',
     };
 
     // Calculate which steps are active based on progress
@@ -34,6 +34,7 @@ export default function ProgressBar({
 
     // Progress status text
     const getProgressText = () => {
+        console.log(progress);
         if (progress < 10) return t('progress.just_started');
         if (progress < 40) return t('progress.investigating');
         if (progress < 70) return t('progress.making_progress');
@@ -43,28 +44,18 @@ export default function ProgressBar({
 
     return (
         <div className={`w-full ${className}`}>
-            {/* Main progress bar */}
-            <div className={`w-full rounded-full bg-surface-200 dark:bg-surface-700 ${heights[size]} overflow-hidden shadow-inner`}>
-                <motion.div
-                    className="rounded-full bg-gradient-to-r from-primary-600 to-accent-600 h-full shadow-sm"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${progress}%` }}
-                    transition={{ duration: 0.5, ease: "easeOut" }}
-                />
-            </div>
-
             {/* Step markers */}
             {showSteps && (
                 <div className="mt-3 flex justify-between items-center px-1">
                     {/* Discovery */}
                     <div className="flex flex-col items-center">
-                        <div className={`w-3.5 h-3.5 rounded-full mb-1.5 ${isDiscoveryActive
-                            ? 'bg-primary-600 ring-2 ring-primary-200 dark:ring-primary-900'
-                            : 'bg-surface-300 dark:bg-surface-600'
+                        <div className={`w-4 h-4 mb-1.5 transform rotate-12 border-2 border-black ${isDiscoveryActive
+                            ? 'bg-[var(--borderlands-yellow)]'
+                            : 'bg-surface-600'
                             }`} />
-                        <span className={`text-xs font-medium text-center ${isDiscoveryActive
-                            ? 'text-primary-900 dark:text-primary-300'
-                            : 'text-surface-600 dark:text-surface-400'
+                        <span className={`text-xs font-bold text-center comic-text ${isDiscoveryActive
+                            ? 'text-[var(--borderlands-yellow)]'
+                            : 'text-surface-400'
                             }`}>
                             {t('progress.discovery')}
                         </span>
@@ -72,13 +63,13 @@ export default function ProgressBar({
 
                     {/* Analysis */}
                     <div className="flex flex-col items-center">
-                        <div className={`w-3.5 h-3.5 rounded-full mb-1.5 ${isAnalysisActive
-                            ? 'bg-primary-600 ring-2 ring-primary-200 dark:ring-primary-900'
-                            : 'bg-surface-300 dark:bg-surface-600'
+                        <div className={`w-4 h-4 mb-1.5 transform -rotate-12 border-2 border-black ${isAnalysisActive
+                            ? 'bg-[var(--borderlands-orange)]'
+                            : 'bg-surface-600'
                             }`} />
-                        <span className={`text-xs font-medium text-center ${isAnalysisActive
-                            ? 'text-primary-900 dark:text-primary-300'
-                            : 'text-surface-600 dark:text-surface-400'
+                        <span className={`text-xs font-bold text-center comic-text ${isAnalysisActive
+                            ? 'text-[var(--borderlands-orange)]'
+                            : 'text-surface-400'
                             }`}>
                             {t('progress.analysis')}
                         </span>
@@ -86,13 +77,13 @@ export default function ProgressBar({
 
                     {/* Interview */}
                     <div className="flex flex-col items-center">
-                        <div className={`w-3.5 h-3.5 rounded-full mb-1.5 ${isInterviewActive
-                            ? 'bg-primary-600 ring-2 ring-primary-200 dark:ring-primary-900'
-                            : 'bg-surface-300 dark:bg-surface-600'
+                        <div className={`w-4 h-4 mb-1.5 transform rotate-12 border-2 border-black ${isInterviewActive
+                            ? 'bg-[var(--borderlands-orange)]'
+                            : 'bg-surface-600'
                             }`} />
-                        <span className={`text-xs font-medium text-center ${isInterviewActive
-                            ? 'text-primary-900 dark:text-primary-300'
-                            : 'text-surface-600 dark:text-surface-400'
+                        <span className={`text-xs font-bold text-center comic-text ${isInterviewActive
+                            ? 'text-[var(--borderlands-orange)]'
+                            : 'text-surface-400'
                             }`}>
                             {t('progress.interview')}
                         </span>
@@ -100,27 +91,37 @@ export default function ProgressBar({
 
                     {/* Solution */}
                     <div className="flex flex-col items-center">
-                        <div className={`w-3.5 h-3.5 rounded-full mb-1.5 ${isSolutionActive
-                            ? 'bg-primary-600 ring-2 ring-primary-200 dark:ring-primary-900'
-                            : 'bg-surface-300 dark:bg-surface-600'
+                        <div className={`w-4 h-4 mb-1.5 transform -rotate-12 border-2 border-black ${isSolutionActive
+                            ? 'bg-[var(--borderlands-yellow)]'
+                            : 'bg-surface-600'
                             }`} />
-                        <span className={`text-xs font-medium text-center ${isSolutionActive
-                            ? 'text-primary-900 dark:text-primary-300'
-                            : 'text-surface-600 dark:text-surface-400'
+                        <span className={`text-xs font-bold text-center comic-text ${isSolutionActive
+                            ? 'text-[var(--borderlands-yellow)]'
+                            : 'text-surface-400'
                             }`}>
                             {t('progress.solution')}
                         </span>
                     </div>
                 </div>
             )}
+            
+            {/* Main progress bar */}
+            <div className={`w-full bg-surface-800 ${heights[size]} overflow-hidden relative border-2 border-black`}>
+                <motion.div
+                    className="bg-yellow-500 from-yellow-300 to-yellow-500 h-full relative z-999 shadow-[0_0_8px_rgba(255,204,0,0.8)]"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progress}%` }}
+                    transition={{ duration: 0.5, ease: "easeOut" }}
+                />
+            </div>
 
             {/* Progress percentage text */}
             {showText && (
                 <div className="mt-2 flex justify-between items-center">
-                    <span className="text-sm font-medium text-surface-800 dark:text-surface-200">
+                    <span className="text-sm font-bold text-surface-200 comic-text">
                         {getProgressText()}
                     </span>
-                    <span className="text-sm font-bold text-primary-800 dark:text-primary-300">
+                    <span className="text-sm font-black text-[var(--borderlands-yellow)] comic-text">
                         {progress}%
                     </span>
                 </div>

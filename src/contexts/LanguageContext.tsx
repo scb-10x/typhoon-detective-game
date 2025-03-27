@@ -1,7 +1,6 @@
 'use client';
 
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { thCases, thClues, thSuspects } from '@/data/translatedCases';
 
 type Language = 'en' | 'th';
 
@@ -17,7 +16,7 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 const translations: Record<Language, Record<string, string>> = {
     en: {
         // Common
-        'app.title': 'Detective Game',
+        'app.title': 'Typhoon Detective',
         'app.subtitle': 'Solve the case!',
         'app.loading': 'Loading...',
         'app.error': 'An error occurred',

@@ -1,30 +1,37 @@
 'use client'
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaArrowLeft, FaCheck, FaExclamationTriangle, FaSearch, FaUser, FaEye } from 'react-icons/fa';
 import Layout from '@/components/Layout';
 import Button from '@/components/Button';
 import Card from '@/components/Card';
+import Dialog from '@/components/Dialog';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useGame } from '@/contexts/GameContext';
 import React from 'react';
 
 interface CasePageProps {
-    params: {
+    params: Promise<{
         id: string;
-    };
+    }>;
 }
 
 export default function CasePage({ params }: CasePageProps) {
     const router = useRouter();
-    const { t } = useLanguage();
     const { state, dispatch } = useGame();
     const { cases, clues, suspects, gameState } = state;
+    const activeActionDispatched = useRef(false);
 
     const [activeTab, setActiveTab] = useState<'overview' | 'clues' | 'suspects'>('overview');
+    const [caseId, setCaseId] = useState<string>('');
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-    // Get the case ID without using React.use()
-    const caseId = params.id;
+    useEffect(() => {
+        const fetchCaseId = async () => {
+            setCaseId((await params).id);
+        };
+        fetchCaseId();
+    }, [params]);
 
     // Find the case by ID
     const caseData = cases.find(c => c.id === caseId);
@@ -35,10 +42,11 @@ export default function CasePage({ params }: CasePageProps) {
 
     // Set the case as active when the page loads
     useEffect(() => {
-        if (caseData && gameState.activeCase !== caseData.id) {
+        if (caseData && gameState.activeCase !== caseData.id && !activeActionDispatched.current) {
+            activeActionDispatched.current = true;
             dispatch({ type: 'SET_ACTIVE_CASE', payload: caseData.id });
         }
-    }, [caseData, dispatch, gameState.activeCase]);
+    }, [caseData, gameState.activeCase, dispatch]);
 
     // Handle case not found
     if (!caseData) {
@@ -97,14 +105,20 @@ export default function CasePage({ params }: CasePageProps) {
                 gameState.interviewedSuspects.includes(s.id)
             ).length;
 
-            // Require at least 70% of clues to be examined and all suspects interviewed
-            const hasEnoughEvidence = (examinedCluesCount / caseClues.length) >= 0.7 &&
+            // Total available clues count (discovered + examined without duplicates)
+            const availableCluesCount = discoveredCluesCount + examinedCluesCount 
+                - caseClues.filter(c => 
+                    gameState.discoveredClues.includes(c.id) && gameState.examinedClues.includes(c.id)
+                ).length;
+
+            // Require at least 70% of clues to be either discovered or examined, and all suspects interviewed
+            const hasEnoughEvidence = (availableCluesCount / caseClues.length) >= 0.7 &&
                 interviewedSuspectsCount === caseSuspects.length;
 
             if (hasEnoughEvidence) {
-                router.push(`/cases/${params.id}/solve`);
+                router.push(`/cases/${caseId}/solve`);
             } else {
-                alert('You need to gather more evidence before solving the case. Examine more clues and interview all suspects.');
+                setIsDialogOpen(true);
             }
         }
     };
@@ -132,7 +146,7 @@ export default function CasePage({ params }: CasePageProps) {
                     <Button
                         variant={caseData.solved ? 'outline' : 'accent'}
                         onClick={handleSolveCase}
-                        disabled={caseData.solved}
+                        isDisabled={caseData.solved}
                     >
                         {caseData.solved ? 'Case Solved' : 'Solve Case'}
                     </Button>
@@ -150,7 +164,7 @@ export default function CasePage({ params }: CasePageProps) {
                                     }`}
                                 onClick={() => setActiveTab(tab as any)}
                             >
-                                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                                <span className="comic-text">{tab.charAt(0).toUpperCase() + tab.slice(1)}</span>
                             </button>
                         ))}
                     </nav>
@@ -177,11 +191,11 @@ export default function CasePage({ params }: CasePageProps) {
                             <div className="mb-4">
                                 <div className="flex justify-between mb-1">
                                     <span className="text-sm">Overall</span>
-                                    <span className="text-sm">{gameState.gameProgress}%</span>
+                                    <span className="text-sm font-bold text-yellow-400">{gameState.gameProgress}%</span>
                                 </div>
-                                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                <div className="w-full bg-surface-800 rounded-full h-2 overflow-hidden relative border border-black">
                                     <div
-                                        className="bg-accent h-2 rounded-full"
+                                        className="bg-yellow-500 h-2 rounded-full shadow-[0_0_8px_rgba(255,204,0,0.6)]"
                                         style={{ width: `${gameState.gameProgress}%` }}
                                     ></div>
                                 </div>
@@ -191,7 +205,7 @@ export default function CasePage({ params }: CasePageProps) {
                                 <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
                                     <div className="text-xl font-bold">
                                         {gameState.discoveredClues.filter(id =>
-                                            clues.find(c => c.id === id)?.caseId === params.id
+                                            clues.find(c => c.id === id)?.caseId === caseId
                                         ).length} / {caseClues.length}
                                     </div>
                                     <div className="text-sm text-gray-600 dark:text-gray-400">Clues Discovered</div>
@@ -199,7 +213,7 @@ export default function CasePage({ params }: CasePageProps) {
                                 <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
                                     <div className="text-xl font-bold">
                                         {gameState.examinedClues.filter(id =>
-                                            clues.find(c => c.id === id)?.caseId === params.id
+                                            clues.find(c => c.id === id)?.caseId === caseId
                                         ).length} / {caseClues.length}
                                     </div>
                                     <div className="text-sm text-gray-600 dark:text-gray-400">Clues Examined</div>
@@ -207,7 +221,7 @@ export default function CasePage({ params }: CasePageProps) {
                                 <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
                                     <div className="text-xl font-bold">
                                         {gameState.interviewedSuspects.filter(id =>
-                                            suspects.find(s => s.id === id)?.caseId === params.id
+                                            suspects.find(s => s.id === id)?.caseId === caseId
                                         ).length} / {caseSuspects.length}
                                     </div>
                                     <div className="text-sm text-gray-600 dark:text-gray-400">Suspects Interviewed</div>
@@ -225,7 +239,7 @@ export default function CasePage({ params }: CasePageProps) {
                                     className="justify-start"
                                     onClick={() => setActiveTab('clues')}
                                 >
-                                    <FaSearch className="mr-2" /> View All Clues
+                                    <FaSearch className="mr-2" /> <span className="comic-text">View All Clues</span>
                                 </Button>
                                 <Button
                                     variant="outline"
@@ -233,24 +247,24 @@ export default function CasePage({ params }: CasePageProps) {
                                     className="justify-start"
                                     onClick={() => setActiveTab('suspects')}
                                 >
-                                    <FaUser className="mr-2" /> View All Suspects
+                                    <FaUser className="mr-2" /> <span className="comic-text">View All Suspects</span>
                                 </Button>
                                 <Button
                                     variant="outline"
                                     fullWidth
                                     className="justify-start"
-                                    onClick={() => router.push(`/cases/${params.id}/map`)}
+                                    onClick={() => router.push(`/cases/${caseId}/map`)}
                                 >
-                                    <FaEye className="mr-2" /> Investigate Scene
+                                    <FaEye className="mr-2" /> <span className="comic-text">Investigate Scene</span>
                                 </Button>
                                 <Button
                                     variant={caseData.solved ? 'outline' : 'accent'}
                                     fullWidth
                                     className="justify-start"
                                     onClick={handleSolveCase}
-                                    disabled={caseData.solved}
+                                    isDisabled={caseData.solved}
                                 >
-                                    <FaCheck className="mr-2" /> {caseData.solved ? 'Case Solved' : 'Solve Case'}
+                                    <FaCheck className="mr-2" /> <span className="comic-text">{caseData.solved ? 'Case Solved' : 'Solve Case'}</span>
                                 </Button>
                             </div>
 
@@ -278,9 +292,9 @@ export default function CasePage({ params }: CasePageProps) {
                             <h2 className="text-xl font-semibold">Evidence & Clues</h2>
                             <Button
                                 variant="primary"
-                                onClick={() => router.push(`/cases/${params.id}/map`)}
+                                onClick={() => router.push(`/cases/${caseId}/map`)}
                             >
-                                Discover New Clues
+                                <span className="comic-text">Discover New Clues</span>
                             </Button>
                         </div>
 
@@ -316,7 +330,7 @@ export default function CasePage({ params }: CasePageProps) {
                                                                 handleExamineClue(clue.id);
                                                             }}
                                                         >
-                                                            Examine
+                                                            <span className="comic-text">Examine</span>
                                                         </Button>
                                                     )}
                                                     {!isDiscovered && (
@@ -328,7 +342,7 @@ export default function CasePage({ params }: CasePageProps) {
                                                                 handleDiscoverClue(clue.id);
                                                             }}
                                                         >
-                                                            Collect
+                                                            <span className="comic-text">Collect</span>
                                                         </Button>
                                                     )}
                                                 </div>
@@ -354,9 +368,9 @@ export default function CasePage({ params }: CasePageProps) {
                                 </p>
                                 <Button
                                     variant="accent"
-                                    onClick={() => router.push(`/cases/${params.id}/map`)}
+                                    onClick={() => router.push(`/cases/${caseId}/map`)}
                                 >
-                                    Start Investigation
+                                    <span className="comic-text">Start Investigation</span>
                                 </Button>
                             </div>
                         )}
@@ -396,7 +410,7 @@ export default function CasePage({ params }: CasePageProps) {
                                                             handleInterviewSuspect(suspect.id);
                                                         }}
                                                     >
-                                                        {isInterviewed ? 'Review' : 'Interview'}
+                                                        <span className="comic-text">{isInterviewed ? 'Review' : 'Interview'}</span>
                                                     </Button>
                                                 </div>
                                             }
@@ -428,15 +442,25 @@ export default function CasePage({ params }: CasePageProps) {
                                 </p>
                                 <Button
                                     variant="accent"
-                                    onClick={() => router.push(`/cases/${params.id}/map`)}
+                                    onClick={() => router.push(`/cases/${caseId}/map`)}
                                 >
-                                    Continue Investigation
+                                    <span className="comic-text">Continue Investigation</span>
                                 </Button>
                             </div>
                         )}
                     </div>
                 )}
             </div>
+
+            {/* Dialog for insufficient evidence */}
+            <Dialog
+                isOpen={isDialogOpen}
+                onClose={() => setIsDialogOpen(false)}
+                title="Not Enough Evidence"
+                message="You need to gather more evidence before solving the case. Make sure you've discovered or examined at least 70% of the clues and interviewed all suspects."
+                confirmText="OK"
+                type="warning"
+            />
         </Layout>
     );
 } 

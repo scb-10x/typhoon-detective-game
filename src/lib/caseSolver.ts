@@ -160,7 +160,7 @@ Respond in a structured JSON format that can be parsed by JavaScript, including 
  * Formats the raw LLM JSON output into our CaseSolution structure
  */
 function formatCaseSolution(
-    data: any,
+    data: unknown,
     culpritId: string,
     evidenceIds: string[],
     reasoning: string,
@@ -169,13 +169,13 @@ function formatCaseSolution(
     // Determine if the solution is correct
     // The actual model output might have a "solved", "correct", "isCorrect" etc. field
     const solved = isCorrect && (
-        data.solved === true ||
-        data.correct === true ||
-        data.isCorrect === true
+        (data as any).solved === true ||
+        (data as any).correct === true ||
+        (data as any).isCorrect === true
     );
 
     // Get the narrative or explanation
-    const narrative = data.narrative || data.explanation || data.description || '';
+    const narrative = (data as any).narrative || (data as any).explanation || (data as any).description || '';
 
     return {
         solved,

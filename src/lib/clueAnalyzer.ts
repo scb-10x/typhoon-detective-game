@@ -8,7 +8,23 @@ Given details about a clue and the case context, provide a detailed analysis inc
 2. Connections to suspects
 3. Suggested next investigative steps
 
-Be precise, logical, and focus on deduction based on the evidence provided.`;
+Be precise, logical, and focus on deduction based on the evidence provided.
+
+IMPORTANT: You must respond in valid JSON format with the following structure:
+{
+  "summary": "A comprehensive summary of the clue's significance",
+  "connections": [
+    {
+      "suspect": "Name of suspect", 
+      "connectionType": "Type of connection (e.g., direct, indirect)",
+      "description": "Description of how this clue connects to the suspect"
+    }
+  ],
+  "nextSteps": [
+    "First investigative step to take",
+    "Second investigative step to take"
+  ]
+}`;
 
 const CLUE_ANALYSIS_PROMPT_TH = `คุณเป็นผู้ช่วยนักสืบที่ฉลาดเฉียบแหลมที่กำลังช่วยวิเคราะห์หลักฐานในคดี
 เมื่อได้รับรายละเอียดเกี่ยวกับหลักฐานและบริบทของคดี โปรดให้การวิเคราะห์โดยละเอียดซึ่งรวมถึง:
@@ -16,7 +32,23 @@ const CLUE_ANALYSIS_PROMPT_TH = `คุณเป็นผู้ช่วยน�
 2. ความเชื่อมโยงกับผู้ต้องสงสัย
 3. ขั้นตอนการสืบสวนต่อไปที่แนะนำ
 
-มีความแม่นยำ มีเหตุผล และมุ่งเน้นการอนุมานตามหลักฐานที่มี`;
+มีความแม่นยำ มีเหตุผล และมุ่งเน้นการอนุมานตามหลักฐานที่มี
+
+สำคัญ: คุณต้องตอบในรูปแบบ JSON ที่ถูกต้องตามโครงสร้างต่อไปนี้:
+{
+  "summary": "สรุปหลักฐานแบบรอบด้าน",
+  "connections": [
+    {
+      "suspect": "ชื่อผู้ต้องสงสัย", 
+      "connectionType": "ประเภทของความเชื่อมโยง (เช่น ทางตรง ทางอ้อม)",
+      "description": "คำอธิบายว่าหลักฐานนี้เชื่อมโยงกับผู้ต้องสงสัยอย่างไร"
+    }
+  ],
+  "nextSteps": [
+    "ขั้นตอนแรกที่ควรทำต่อไป",
+    "ขั้นตอนที่สองที่ควรทำต่อไป"
+  ]
+}`;
 
 /**
  * Analyzes a clue in the context of a case using the Typhoon LLM
@@ -59,7 +91,7 @@ ${discoveredClues.filter(c => c.id !== clue.id).map(c => `${c.title}: ${c.descri
 2. ความเชื่อมโยงกับผู้ต้องสงสัย
 3. ขั้นตอนการสืบสวนต่อไปที่แนะนำ
 
-ตอบในรูปแบบ JSON ที่มีโครงสร้างซึ่งสามารถแปลงโดย JavaScript ได้`;
+ตอบในรูปแบบ JSON ตามโครงสร้างที่กำหนดในคำแนะนำระบบ`;
     } else {
         userPrompt = `Case Information:
 Title: ${caseData.title}
@@ -85,7 +117,7 @@ Please analyze this clue and provide:
 2. Connections to suspects
 3. Suggested next investigative steps
 
-Respond in a structured JSON format that can be parsed by JavaScript.`;
+Respond in the JSON format specified in the system instructions.`;
     }
 
     // Prepare messages for API call
@@ -94,94 +126,135 @@ Respond in a structured JSON format that can be parsed by JavaScript.`;
         { role: 'user', content: userPrompt }
     ];
 
-    // Use the standard model for clue analysis
-    const response = await fetchTyphoonCompletion(
-        messages,
-        'typhoon-v2-70b-instruct',
-        0.7,
-        2048
-    );
-
-    // Parse the JSON response
     try {
-        // Use a fallback technique to extract JSON if direct parsing fails
-        const jsonMatch = response.match(/```json\n([\s\S]*?)\n```/) ||
-            response.match(/```([\s\S]*?)```/) ||
-            response.match(/({[\s\S]*})/);
+        // Use the standard model for clue analysis
+        const response = await fetchTyphoonCompletion(
+            messages,
+            'typhoon-v2-70b-instruct',
+            0.7,
+            2048
+        );
 
-        const jsonContent = jsonMatch ? jsonMatch[1] : response;
-        const parsedData = JSON.parse(jsonContent);
+        // Parse the JSON response
+        try {
+            // First try to parse the response directly
+            let jsonContent = response;
+            
+            // If direct parsing fails, try to extract JSON
+            try {
+                JSON.parse(jsonContent);
+            } catch {
+                // Look for JSON block in markdown or text
+                const jsonMatch = response.match(/```json\n([\s\S]*?)\n```/) ||
+                    response.match(/```([\s\S]*?)```/) ||
+                    response.match(/({[\s\S]*})/);
+                
+                if (jsonMatch) {
+                    jsonContent = jsonMatch[1];
+                }
+            }
+            
+            const parsedData = JSON.parse(jsonContent);
 
-        // Format the response into our expected structure
-        return formatClueAnalysis(parsedData, suspects, clue.id);
-    } catch (error) {
-        console.error('Failed to parse clue analysis:', error);
+            // Format the response into our expected structure
+            return formatClueAnalysis(parsedData, suspects);
+        } catch (parseError) {
+            console.error('Failed to parse clue analysis as JSON:', parseError);
+            console.log('Raw response:', response);
 
-        // If JSON parsing fails, try to extract information from raw text
-        return extractClueAnalysisFromText(response, suspects, clue.id);
+            // If JSON parsing fails, try to extract information from raw text
+            return extractClueAnalysisFromText(response, suspects);
+        }
+    } catch (apiError) {
+        console.error('Failed to get clue analysis from API:', apiError);
+        throw new Error('Failed to analyze clue. Please try again later.');
     }
 }
 
 /**
  * Formats the raw LLM JSON output into our ClueAnalysis structure
  */
-function formatClueAnalysis(data: any, suspects: Suspect[], clueId: string): ClueAnalysis {
-    const connections = [];
+function formatClueAnalysis(data: unknown, suspects: Suspect[]): ClueAnalysis {
+    const connections: Array<{
+        suspectId: string;
+        connectionType: string;
+        description: string;
+    }> = [];
 
     // Process connections data
-    if (data.connections && Array.isArray(data.connections)) {
-        for (const connection of data.connections) {
+    if ((data as any).connections && Array.isArray((data as any).connections)) {
+        for (const connection of (data as any).connections) {
             // Try to find the suspect this connection refers to
-            const suspectName = connection.suspect || connection.suspectName || connection.name;
-            const connectionType = connection.type || connection.connectionType || 'related';
+            const suspectName = connection.suspect || connection.suspectName || connection.name || '';
+            const connectionType = connection.connectionType || connection.type || 'related';
             const description = connection.description || '';
 
-            const matchedSuspect = suspects.find(s =>
-                s.name.toLowerCase().includes(suspectName.toLowerCase()) ||
-                suspectName.toLowerCase().includes(s.name.toLowerCase())
-            );
+            if (suspectName) {
+                const matchedSuspect = suspects.find(s =>
+                    s.name.toLowerCase().includes(suspectName.toLowerCase()) ||
+                    suspectName.toLowerCase().includes(s.name.toLowerCase())
+                );
 
-            if (matchedSuspect) {
-                connections.push({
-                    suspectId: matchedSuspect.id,
-                    connectionType,
-                    description
-                });
+                if (matchedSuspect) {
+                    connections.push({
+                        suspectId: matchedSuspect.id,
+                        connectionType,
+                        description
+                    });
+                }
             }
         }
     }
 
     // If no connections were found but there's a connections text field
-    if (connections.length === 0 && typeof data.connections === 'string') {
+    if (connections.length === 0 && typeof (data as any).connections === 'string') {
         // Try to find mentions of suspect names in the connections text
         for (const suspect of suspects) {
-            if (data.connections.toLowerCase().includes(suspect.name.toLowerCase())) {
+            if ((data as any).connections.toLowerCase().includes(suspect.name.toLowerCase())) {
                 connections.push({
                     suspectId: suspect.id,
                     connectionType: 'mentioned',
-                    description: data.connections
+                    description: (data as any).connections
                 });
             }
         }
     }
 
+    // Ensure we have a valid summary
+    const summary = (data as any).summary || 'No summary available';
+    
+    // Process next steps - ensure it's an array
+    let nextSteps: string[] = [];
+    if ((data as any).nextSteps) {
+        if (Array.isArray((data as any).nextSteps)) {
+            nextSteps = (data as any).nextSteps;
+        } else if (typeof (data as any).nextSteps === 'string') {
+            // Split by newlines if it's a string
+            nextSteps = [(data as any).nextSteps];
+        }
+    }
+
     return {
-        summary: data.summary || '',
+        summary,
         connections,
-        nextSteps: Array.isArray(data.nextSteps) ? data.nextSteps :
-            (data.nextSteps ? [data.nextSteps] : [])
+        nextSteps: nextSteps.length > 0 ? nextSteps : ['Continue investigating']
     };
 }
 
 /**
  * Falls back to extracting information from raw text when JSON parsing fails
  */
-function extractClueAnalysisFromText(text: string, suspects: Suspect[], clueId: string): ClueAnalysis {
+function extractClueAnalysisFromText(text: string, suspects: Suspect[]): ClueAnalysis {
     const summary = text.match(/summary[:\s]+(.*?)(?:\n|$)/i)?.[1] ||
         text.match(/significance[:\s]+(.*?)(?:\n|$)/i)?.[1] ||
+        text.match(/1\.([\s\S]*?)(?:2\.|$)/)?.[1]?.trim() ||
         'Analysis unavailable';
 
-    const connections = [];
+    const connections: Array<{
+        suspectId: string;
+        connectionType: string;
+        description: string;
+    }> = [];
 
     // Try to extract connections by finding suspect names in the text
     for (const suspect of suspects) {
@@ -200,14 +273,21 @@ function extractClueAnalysisFromText(text: string, suspects: Suspect[], clueId: 
         }
     }
 
-    // Try to extract next steps
-    const nextStepsMatch = text.match(/next steps?[:\s]+(.*?)(?:\n\n|$)/i);
-    const nextSteps = nextStepsMatch ?
-        nextStepsMatch[1]
-            .split(/\n/) // Split by newlines
-            .map(s => s.replace(/^[-*]\s*/, '').trim()) // Remove bullet points
-            .filter(s => s.length > 0) : // Remove empty lines
-        ['Continue investigating'];
+    // Try to extract next steps - look for section "3." or "Next steps"
+    let nextSteps: string[] = [];
+    const nextStepsRegex = /(?:3\.|next steps?)[:\s]+([\s\S]*?)(?:\n\n|$)/i;
+    const nextStepsMatch = text.match(nextStepsRegex);
+    
+    if (nextStepsMatch && nextStepsMatch[1]) {
+        nextSteps = nextStepsMatch[1]
+            .split(/\n|-|\*/)  // Split by newlines or bullet points
+            .map(s => s.trim())
+            .filter(s => s.length > 0); // Remove empty lines
+    }
+    
+    if (nextSteps.length === 0) {
+        nextSteps = ['Continue investigating'];
+    }
 
     return {
         summary,

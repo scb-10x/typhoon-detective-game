@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaArrowLeft, FaCheck, FaTimes, FaExclamationTriangle, FaMedal } from 'react-icons/fa';
 import Layout from '@/components/Layout';
 import Button from '@/components/Button';
-import Card from '@/components/Card';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useGame } from '@/contexts/GameContext';
 import { useTyphoon } from '@/hooks/useTyphoon';
@@ -13,14 +12,14 @@ import { TyphoonMessage } from '@/lib/typhoon';
 import { CaseSolution } from '@/types/game';
 
 interface SolveCasePageProps {
-    params: {
+    params: Promise<{
         id: string;
-    };
+    }>;
 }
 
 export default function SolveCasePage({ params }: SolveCasePageProps) {
     const router = useRouter();
-    const { t, language } = useLanguage();
+    const { language } = useLanguage();
     const { state, dispatch } = useGame();
     const { cases, clues, suspects, gameState } = state;
     const { sendMessage, loading: isAnalyzing } = useTyphoon();
@@ -31,10 +30,16 @@ export default function SolveCasePage({ params }: SolveCasePageProps) {
     const [solution, setSolution] = useState<CaseSolution | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [caseId, setCaseId] = useState<string>('');
+    const redirectActionDispatched = useRef(false);
 
-    // Note: Direct access to params.id is supported for migration in this Next.js version
-    // In a future version, params will need to be unwrapped with React.use()
-    const caseId = params.id;
+    // Update params.id to use state with async/await approach
+    useEffect(() => {
+        const fetchCaseId = async () => {
+            setCaseId((await params).id);
+        };
+        fetchCaseId();
+    }, [params]);
 
     // Find the case by ID
     const caseData = cases.find(c => c.id === caseId);
@@ -43,37 +48,28 @@ export default function SolveCasePage({ params }: SolveCasePageProps) {
     const caseClues = clues.filter(c => c.caseId === caseId);
     const caseSuspects = suspects.filter(s => s.caseId === caseId);
 
-    // Filter to only discovered and examined clues
+    // Filter to include both discovered and examined clues
     const discoveredClues = caseClues.filter(c => gameState.discoveredClues.includes(c.id));
     const examinedClues = caseClues.filter(c => gameState.examinedClues.includes(c.id));
+    const availableClues = [...examinedClues];
+    
+    // Add any discovered clues that aren't already examined
+    discoveredClues.forEach(clue => {
+        if (!examinedClues.some(c => c.id === clue.id)) {
+            availableClues.push(clue);
+        }
+    });
 
     // Get interviewed suspects
     const interviewedSuspects = caseSuspects.filter(s => gameState.interviewedSuspects.includes(s.id));
 
-    // Handle case not found
-    if (!caseData) {
-        return (
-            <Layout>
-                <div className="text-center py-12">
-                    <h1 className="text-2xl font-bold mb-4">Case Not Found</h1>
-                    <p className="mb-6">The case you are looking for does not exist.</p>
-                    <Button
-                        variant="primary"
-                        onClick={() => router.push('/cases')}
-                    >
-                        Back to Cases
-                    </Button>
-                </div>
-            </Layout>
-        );
-    }
-
-    // Redirect if case is already solved
+    // Always define this useEffect, but conditionally check inside it
     useEffect(() => {
-        if (caseData.solved) {
-            router.push(`/cases/${params.id}`);
+        if (caseData?.solved && !redirectActionDispatched.current) {
+            redirectActionDispatched.current = true;
+            router.push(`/cases/${caseId}`);
         }
-    }, [caseData.solved, params.id, router]);
+    }, [caseData?.solved, caseId, router]);
 
     // Toggle clue selection
     const toggleClueSelection = (clueId: string) => {
@@ -106,6 +102,11 @@ export default function SolveCasePage({ params }: SolveCasePageProps) {
         setError(null);
 
         try {
+            // Make sure caseData exists
+            if (!caseData) {
+                throw new Error('Case not found');
+            }
+
             // Prepare data for LLM
             const selectedSuspectData = caseSuspects.find(s => s.id === selectedSuspect);
             const selectedCluesData = caseClues.filter(c => selectedClues.includes(c.id));
@@ -193,7 +194,7 @@ Please analyze the player's solution and include this JSON format in your respon
                 setSolution(solution);
 
                 // Mark case as solved regardless of player's accuracy
-                dispatch({ type: 'SOLVE_CASE', payload: params.id });
+                dispatch({ type: 'SOLVE_CASE', payload: caseId });
             } else {
                 throw new Error('Could not parse solution from LLM response');
             }
@@ -207,6 +208,24 @@ Please analyze the player's solution and include this JSON format in your respon
         }
     };
 
+    // Render "Case Not Found" if caseData is undefined
+    if (!caseData) {
+        return (
+            <Layout>
+                <div className="text-center py-12">
+                    <h1 className="text-2xl font-bold mb-4">Case Not Found</h1>
+                    <p className="mb-6">The case you are looking for does not exist.</p>
+                    <Button
+                        variant="primary"
+                        onClick={() => router.push('/cases')}
+                    >
+                        Back to Cases
+                    </Button>
+                </div>
+            </Layout>
+        );
+    }
+
     // Solution result page
     if (solution) {
         // Find the actual culprit
@@ -218,7 +237,7 @@ Please analyze the player's solution and include this JSON format in your respon
                 <div className="mb-8">
                     <div className="flex items-center mb-6">
                         <button
-                            onClick={() => router.push(`/cases/${params.id}`)}
+                            onClick={() => router.push(`/cases/${caseId}`)}
                             className="mr-4 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
                         >
                             <FaArrowLeft />
@@ -286,7 +305,7 @@ Please analyze the player's solution and include this JSON format in your respon
                             <Button
                                 variant="primary"
                                 fullWidth
-                                onClick={() => router.push(`/cases/${params.id}`)}
+                                onClick={() => router.push(`/cases/${caseId}`)}
                             >
                                 Back to Case
                             </Button>
@@ -315,7 +334,7 @@ Please analyze the player's solution and include this JSON format in your respon
                 {/* Header */}
                 <div className="flex items-center mb-6">
                     <button
-                        onClick={() => router.push(`/cases/${params.id}`)}
+                        onClick={() => router.push(`/cases/${caseId}`)}
                         className="mr-4 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
                     >
                         <FaArrowLeft />
@@ -384,7 +403,7 @@ Please analyze the player's solution and include this JSON format in your respon
                             <p className="mb-4">Select the evidence that supports your conclusion:</p>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                                {examinedClues.map(clue => (
+                                {availableClues.map(clue => (
                                     <div
                                         key={clue.id}
                                         className={`p-4 rounded-lg cursor-pointer border-2 transition-colors ${selectedClues.includes(clue.id)
@@ -401,7 +420,7 @@ Please analyze the player's solution and include this JSON format in your respon
                                 ))}
                             </div>
 
-                            {examinedClues.length === 0 && (
+                            {availableClues.length === 0 && (
                                 <div className="text-center py-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
                                     <p className="text-gray-600 dark:text-gray-400">
                                         You haven't examined any clues yet. Go back and examine some clues first.
@@ -438,7 +457,7 @@ Please analyze the player's solution and include this JSON format in your respon
                                 fullWidth
                                 onClick={handleSolveCase}
                                 isLoading={isSubmitting || isAnalyzing}
-                                disabled={!selectedSuspect || selectedClues.length < 2 || reasoning.trim().length < 20}
+                                isDisabled={!selectedSuspect || selectedClues.length < 2 || reasoning.trim().length < 20}
                             >
                                 {isSubmitting || isAnalyzing ? 'Analyzing...' : 'Submit Solution'}
                             </Button>
@@ -446,6 +465,24 @@ Please analyze the player's solution and include this JSON format in your respon
                             {error && (
                                 <div className="mt-4 p-3 bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 rounded-md">
                                     {error}
+                                </div>
+                            )}
+                            
+                            {/* Requirements checklist */}
+                            {!isSubmitting && !isAnalyzing && (
+                                <div className="mt-4 text-sm">
+                                    <p className="mb-2 text-gray-600 dark:text-gray-400">To submit your solution:</p>
+                                    <ul className="space-y-1 pl-5 list-disc text-gray-600 dark:text-gray-400">
+                                        <li className={selectedSuspect ? "text-green-600 dark:text-green-400" : ""}>
+                                            Select a suspect as the culprit
+                                        </li>
+                                        <li className={selectedClues.length >= 2 ? "text-green-600 dark:text-green-400" : ""}>
+                                            Select at least 2 pieces of evidence ({selectedClues.length}/2)
+                                        </li>
+                                        <li className={reasoning.trim().length >= 20 ? "text-green-600 dark:text-green-400" : ""}>
+                                            Provide reasoning (at least 20 characters, current: {reasoning.trim().length})
+                                        </li>
+                                    </ul>
                                 </div>
                             )}
                         </div>

@@ -3,7 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ButtonProps {
     children: React.ReactNode;
-    onClick?: () => void;
+    onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
     variant?: 'primary' | 'secondary' | 'accent' | 'outline' | 'ghost';
     size?: 'sm' | 'md' | 'lg';
     isLoading?: boolean;
@@ -27,22 +27,22 @@ export default function Button({
     const { t } = useLanguage();
 
     // Define base classes
-    const baseClasses = 'font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all flex items-center justify-center';
+    const baseClasses = 'font-bold comic-text tracking-wide rounded-lg focus:outline-none transition-all flex items-center justify-center transform skew-x-[-5deg] uppercase';
 
     // Classes based on variant
     const variantClasses = {
-        primary: 'bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white focus:ring-primary-500 dark:bg-primary-500 dark:hover:bg-primary-600 dark:focus:ring-primary-400',
-        secondary: 'bg-surface-200 hover:bg-surface-300 active:bg-surface-400 text-surface-800 focus:ring-surface-300 dark:bg-surface-700 dark:hover:bg-surface-600 dark:text-surface-50 dark:focus:ring-surface-500',
-        accent: 'bg-accent-600 hover:bg-accent-700 active:bg-accent-800 text-white focus:ring-accent-500 dark:bg-accent-500 dark:hover:bg-accent-600 dark:focus:ring-accent-400',
-        outline: 'border border-surface-300 hover:bg-surface-100 text-surface-800 focus:ring-surface-200 dark:border-surface-600 dark:hover:bg-surface-800 dark:text-surface-100 dark:focus:ring-surface-700',
-        ghost: 'hover:bg-surface-100 text-surface-800 focus:ring-surface-200 dark:hover:bg-surface-800 dark:text-surface-100 dark:focus:ring-surface-700',
+        primary: 'bg-primary-500 hover:bg-primary-600 active:bg-primary-700 text-white border-3 border-black box-shadow: inset 0 0 0 1px var(--borderlands-yellow), 0 4px 0 0 black',
+        secondary: 'bg-surface-700 hover:bg-surface-600 active:bg-surface-500 text-surface-50 border-3 border-black',
+        accent: 'bg-[var(--borderlands-orange)] hover:bg-[var(--borderlands-red)] active:bg-[var(--borderlands-red)] text-white border-3 border-black shadow-[inset_0_0_0_1px_var(--borderlands-yellow),_0_4px_0_0_black] hover:shadow-[inset_0_0_0_1px_var(--borderlands-yellow),_0_6px_0_0_black] hover:-translate-y-1 active:translate-y-1 active:shadow-[inset_0_0_0_1px_var(--borderlands-yellow),_0_2px_0_0_black]',
+        outline: 'border-3 border-black hover:bg-surface-800 text-surface-100 shadow-[0_4px_0_0_black] hover:shadow-[0_6px_0_0_black] hover:-translate-y-1 active:translate-y-1 active:shadow-[0_2px_0_0_black]',
+        ghost: 'hover:bg-surface-800 text-surface-100',
     };
 
     // Classes based on size
     const sizeClasses = {
         sm: 'text-xs px-3 py-1.5 gap-1.5',
         md: 'text-sm px-4 py-2 gap-2',
-        lg: 'text-base px-5 py-2.5 gap-2.5',
+        lg: 'text-base px-5 py-3 gap-2.5',
     };
 
     // Combine all classes

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { FaArrowLeft, FaChevronRight, FaComment, FaUserTie, FaQuestionCircle, FaEllipsisH } from 'react-icons/fa';
@@ -12,17 +12,19 @@ import { useTyphoon } from '@/hooks/useTyphoon';
 import { TyphoonMessage } from '@/lib/typhoon';
 
 interface SuspectPageProps {
-    params: {
+    params: Promise<{
         id: string;
-    };
+    }>;
 }
 
 export default function SuspectPage({ params }: SuspectPageProps) {
     const router = useRouter();
-    const { t, language } = useLanguage();
+    const { language } = useLanguage();
     const { state, dispatch } = useGame();
     const { suspects, cases, gameState } = state;
-    const { sendMessage, loading: isAsking } = useTyphoon();
+    const { sendMessage } = useTyphoon();
+    const [isAsking, setIsAsking] = useState(false);
+    const interviewActionDispatched = useRef(false);
 
     const [customQuestion, setCustomQuestion] = useState('');
     const [conversation, setConversation] = useState<{
@@ -30,6 +32,7 @@ export default function SuspectPage({ params }: SuspectPageProps) {
         answer: string;
         isCustom?: boolean;
     }[]>([]);
+    const [suspectId, setSuspectId] = useState<string>('');
 
     // Predefined questions based on suspect
     const [predefinedQuestions, setPredefinedQuestions] = useState<string[]>([
@@ -39,9 +42,13 @@ export default function SuspectPage({ params }: SuspectPageProps) {
         'Have you noticed anything unusual lately?'
     ]);
 
-    // Note: Direct access to params.id is supported for migration in this Next.js version
-    // In a future version, params will need to be unwrapped with React.use()
-    const suspectId = params.id;
+    // Update params.id to use state with async/await approach
+    useEffect(() => {
+        const fetchSuspectId = async () => {
+            setSuspectId((await params).id);
+        };
+        fetchSuspectId();
+    }, [params]);
 
     // Find the suspect by ID
     const suspect = suspects.find(s => s.id === suspectId);
@@ -52,9 +59,17 @@ export default function SuspectPage({ params }: SuspectPageProps) {
     // Track if suspect is interviewed
     const isInterviewed = suspect ? gameState.interviewedSuspects.includes(suspect.id) : false;
 
+    // Load saved conversation when component mounts
+    useEffect(() => {
+        if (suspectId && gameState.suspectInterviews[suspectId]) {
+            setConversation(gameState.suspectInterviews[suspectId]);
+        }
+    }, [suspectId, gameState.suspectInterviews]);
+
     // Set the suspect as interviewed when the page loads
     useEffect(() => {
-        if (suspect && !isInterviewed) {
+        if (suspect && !isInterviewed && !interviewActionDispatched.current) {
+            interviewActionDispatched.current = true;
             dispatch({ type: 'INTERVIEW_SUSPECT', payload: suspect.id });
         }
     }, [suspect, dispatch, isInterviewed]);
@@ -82,6 +97,8 @@ export default function SuspectPage({ params }: SuspectPageProps) {
         if (isAsking || !question.trim()) return;
 
         try {
+            setIsAsking(true);
+
             // Remove the question from predefined list if it's not custom
             if (!isCustom) {
                 setPredefinedQuestions(prev => prev.filter(q => q !== question));
@@ -90,10 +107,10 @@ export default function SuspectPage({ params }: SuspectPageProps) {
             }
 
             // Add the question to conversation immediately with loading state
-            setConversation(prev => [
-                ...prev,
-                { question, answer: '...', isCustom }
-            ]);
+            const newQuestionEntry = { question, answer: '...', isCustom };
+            const updatedConversation = [...conversation, newQuestionEntry];
+            
+            setConversation(updatedConversation);
 
             // Prepare the prompt for the LLM
             const systemPrompt = language === 'th'
@@ -123,26 +140,50 @@ Answer as the suspect would, using natural language and appropriate demeanor. Ma
             const response = await sendMessage(messages);
 
             // Update the conversation with the actual response
-            setConversation(prev =>
-                prev.map((item, i) =>
-                    i === prev.length - 1 ? { ...item, answer: response } : item
-                )
-            );
+            setConversation(current => {
+                const updatedConversation = current.map((item, i) => 
+                    i === current.length - 1 ? { ...item, answer: response } : item
+                );
+                
+                // Save the conversation to the global state
+                dispatch({
+                    type: 'SAVE_SUSPECT_INTERVIEW',
+                    payload: { 
+                        suspectId: suspect.id, 
+                        conversation: updatedConversation
+                    }
+                });
+                
+                return updatedConversation;
+            });
         } catch (error) {
             console.error('Error asking question:', error);
 
             // Update with error
-            setConversation(prev =>
-                prev.map((item, i) =>
-                    i === prev.length - 1
-                        ? {
-                            ...item, answer: language === 'en'
-                                ? 'Sorry, I couldn\'t process that question. Please try again.'
-                                : 'ขออภัย ไม่สามารถประมวลผลคำถามได้ กรุณาลองอีกครั้ง'
-                        }
-                        : item
-                )
-            );
+            const errorMessage = language === 'en'
+                ? 'Sorry, I couldn\'t process that question. Please try again.'
+                : 'ขออภัย ไม่สามารถประมวลผลคำถามได้ กรุณาลองอีกครั้ง';
+            
+            // Use the updated conversation that includes the question
+            setConversation(prev => {
+                const errorConversation = [...prev];
+                if (errorConversation.length > 0) {
+                    errorConversation[errorConversation.length - 1].answer = errorMessage;
+                }
+                
+                // Still save the error response to global state
+                dispatch({
+                    type: 'SAVE_SUSPECT_INTERVIEW',
+                    payload: { 
+                        suspectId: suspect.id, 
+                        conversation: errorConversation
+                    }
+                });
+                
+                return errorConversation;
+            });
+        } finally {
+            setIsAsking(false);
         }
     };
 
@@ -267,10 +308,10 @@ Answer as the suspect would, using natural language and appropriate demeanor. Ma
                                     <Button
                                         type="submit"
                                         variant="primary"
-                                        disabled={!customQuestion.trim() || isAsking}
+                                        isDisabled={!customQuestion.trim() || isAsking}
                                         isLoading={isAsking}
                                     >
-                                        Ask
+                                        <span className="comic-text">Ask</span>
                                     </Button>
                                 </div>
                             </form>
@@ -329,7 +370,7 @@ Answer as the suspect would, using natural language and appropriate demeanor. Ma
                                 onClick={() => router.push(`/cases/${caseData.id}`)}
                             >
                                 <div className="flex justify-between items-center">
-                                    <span>Back to case</span>
+                                    <span className="comic-text">Back to case</span>
                                     <FaChevronRight size={12} />
                                 </div>
                             </div>

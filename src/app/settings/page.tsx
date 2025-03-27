@@ -4,11 +4,9 @@ import React from 'react';
 import Layout from '@/components/Layout';
 import Button from '@/components/Button';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useTheme } from '@/contexts/ThemeContext';
 
 export default function SettingsPage() {
     const { language, setLanguage, t } = useLanguage();
-    const { theme, setTheme, currentTheme } = useTheme();
 
     return (
         <Layout title={t('nav.settings')}>
@@ -36,37 +34,6 @@ export default function SettingsPage() {
                                     ไทย
                                 </Button>
                             </div>
-                        </div>
-
-                        {/* Theme settings */}
-                        <div>
-                            <h2 className="text-xl font-semibold mb-3">{t('settings.theme')}</h2>
-                            <div className="flex flex-wrap gap-3">
-                                <Button
-                                    variant={theme === 'light' ? 'accent' : 'outline'}
-                                    size="sm"
-                                    onClick={() => setTheme('light')}
-                                >
-                                    {t('settings.light')}
-                                </Button>
-                                <Button
-                                    variant={theme === 'dark' ? 'accent' : 'outline'}
-                                    size="sm"
-                                    onClick={() => setTheme('dark')}
-                                >
-                                    {t('settings.dark')}
-                                </Button>
-                                <Button
-                                    variant={theme === 'system' ? 'accent' : 'outline'}
-                                    size="sm"
-                                    onClick={() => setTheme('system')}
-                                >
-                                    {t('settings.system')}
-                                </Button>
-                            </div>
-                            <p className="mt-2 text-sm opacity-80">
-                                {theme === 'system' && `${t('settings.system')} (${t(`settings.${currentTheme}`)})`}
-                            </p>
                         </div>
                     </div>
                 </div>

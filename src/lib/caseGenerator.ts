@@ -183,49 +183,49 @@ export async function generateCase(params: CaseGenerationParams): Promise<Genera
 /**
  * Formats the raw LLM output into our application's data structure
  */
-function formatGeneratedCase(data: any, language: 'en' | 'th'): GeneratedCase {
+function formatGeneratedCase(data: unknown, _language: 'en' | 'th'): GeneratedCase {
     // Extract and format case data
     const caseData: Case = {
         id: uuidv4(),
-        title: data.case?.title || data.title || 'Untitled Case',
-        description: data.case?.description || data.description || '',
-        summary: data.case?.summary || data.summary || '',
-        difficulty: data.case?.difficulty || 'medium',
+        title: (data as any)?.case?.title || (data as any)?.title || 'Untitled Case',
+        description: (data as any)?.case?.description || (data as any)?.description || '',
+        summary: (data as any)?.case?.summary || (data as any)?.summary || '',
+        difficulty: (data as any)?.case?.difficulty || 'medium',
         solved: false,
-        location: data.case?.location || data.location || '',
-        dateTime: data.case?.dateTime || data.dateTime || new Date().toISOString(),
-        imageUrl: `https://source.unsplash.com/random/800x600/?mystery,${encodeURIComponent(data.case?.title || data.title || 'detective')}`,
+        location: (data as any)?.case?.location || (data as any)?.location || '',
+        dateTime: (data as any)?.case?.dateTime || (data as any)?.dateTime || new Date().toISOString(),
+        imageUrl: `https://picsum.photos/seed/mystery/800/600`,
         isLLMGenerated: true
     };
 
     // Extract and format clues
-    const clues: Clue[] = (data.clues || []).map((clue: any) => ({
+    const clues: Clue[] = ((data as any)?.clues || []).map((clue: unknown) => ({
         id: uuidv4(),
         caseId: caseData.id,
-        title: clue.title || 'Untitled Clue',
-        description: clue.description || '',
-        location: clue.location || '',
-        type: clue.type || 'physical',
+        title: (clue as any)?.title || 'Untitled Clue',
+        description: (clue as any)?.description || '',
+        location: (clue as any)?.location || '',
+        type: (clue as any)?.type || 'physical',
         discovered: false,
         examined: false,
-        relevance: clue.relevance || 'important'
+        relevance: (clue as any)?.relevance || 'important'
     }));
 
     // Extract and format suspects
-    const suspects: Suspect[] = (data.suspects || []).map((suspect: any) => ({
+    const suspects: Suspect[] = ((data as any)?.suspects || []).map((suspect: unknown) => ({
         id: uuidv4(),
         caseId: caseData.id,
-        name: suspect.name || 'Unknown Suspect',
-        description: suspect.description || '',
-        background: suspect.background || '',
-        motive: suspect.motive || '',
-        alibi: suspect.alibi || '',
-        isGuilty: suspect.isGuilty || false,
+        name: (suspect as any)?.name || 'Unknown Suspect',
+        description: (suspect as any)?.description || '',
+        background: (suspect as any)?.background || '',
+        motive: (suspect as any)?.motive || '',
+        alibi: (suspect as any)?.alibi || '',
+        isGuilty: (suspect as any)?.isGuilty || false,
         interviewed: false
     }));
 
     // Find the guilty suspect based on the solution
-    const solution = data.solution || '';
+    const solution = (data as any)?.solution || '';
     if (solution && suspects.length > 0) {
         // Try to identify the guilty suspect from the solution text
         const guiltyName = suspects.map(s => s.name).find(name =>

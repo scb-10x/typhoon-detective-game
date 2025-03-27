@@ -48,6 +48,7 @@ An interactive detective game built with Next.js, React, and Typhoon AI integrat
    ```
    TYPHOON_API_KEY=your_api_key_here
    ```
+   - The API key is only accessed server-side for security.
 
 4. Run the development server:
    ```bash

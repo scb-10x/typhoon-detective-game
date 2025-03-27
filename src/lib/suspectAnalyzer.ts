@@ -208,12 +208,12 @@ Additional information:
 /**
  * Formats the raw LLM JSON output into our SuspectAnalysis structure
  */
-function formatSuspectAnalysis(data: any, clues: Clue[], suspectId: string): SuspectAnalysis {
+function formatSuspectAnalysis(data: unknown, clues: Clue[], suspectId: string): SuspectAnalysis {
     const connections: SuspectAnalysis['connections'] = [];
 
     // Process connections data
-    if (data.connections && Array.isArray(data.connections)) {
-        for (const connection of data.connections) {
+    if ((data as any).connections && Array.isArray((data as any).connections)) {
+        for (const connection of (data as any).connections) {
             // Try to find the clue this connection refers to
             const clueTitle = connection.clue || connection.clueTitle || connection.title;
             const connectionType = connection.type || connection.connectionType || 'related';
@@ -235,9 +235,9 @@ function formatSuspectAnalysis(data: any, clues: Clue[], suspectId: string): Sus
     }
 
     // Ensure trustworthiness is within range
-    let trustworthiness = typeof data.trustworthiness === 'number'
-        ? data.trustworthiness
-        : parseInt(data.trustworthiness);
+    let trustworthiness = typeof (data as any).trustworthiness === 'number'
+        ? (data as any).trustworthiness
+        : parseInt((data as any).trustworthiness);
 
     if (isNaN(trustworthiness)) {
         trustworthiness = 50; // Default if not a number
@@ -247,18 +247,18 @@ function formatSuspectAnalysis(data: any, clues: Clue[], suspectId: string): Sus
 
     // Process inconsistencies
     let inconsistencies: string[] = [];
-    if (Array.isArray(data.inconsistencies)) {
-        inconsistencies = data.inconsistencies;
-    } else if (typeof data.inconsistencies === 'string') {
-        inconsistencies = [data.inconsistencies];
+    if (Array.isArray((data as any).inconsistencies)) {
+        inconsistencies = (data as any).inconsistencies;
+    } else if (typeof (data as any).inconsistencies === 'string') {
+        inconsistencies = [(data as any).inconsistencies];
     }
 
     // Process suggested questions
     let suggestedQuestions: string[] = [];
-    if (Array.isArray(data.suggestedQuestions)) {
-        suggestedQuestions = data.suggestedQuestions;
-    } else if (typeof data.suggestedQuestions === 'string') {
-        suggestedQuestions = [data.suggestedQuestions];
+    if (Array.isArray((data as any).suggestedQuestions)) {
+        suggestedQuestions = (data as any).suggestedQuestions;
+    } else if (typeof (data as any).suggestedQuestions === 'string') {
+        suggestedQuestions = [(data as any).suggestedQuestions];
     }
 
     return {

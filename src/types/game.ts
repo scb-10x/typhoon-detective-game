@@ -60,6 +60,8 @@ export interface GameState {
     interviewedSuspects: string[];
     casesSolved: string[];
     gameProgress: number;
+    clueAnalyses: Record<string, ClueAnalysis>;
+    suspectInterviews: Record<string, {question: string, answer: string, isCustom?: boolean}[]>;
 }
 
 // Case generation parameters

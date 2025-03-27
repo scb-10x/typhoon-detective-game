@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
     // Basic config that can be exposed to the client
     const config = {
         apiVersion: '1.0.0',

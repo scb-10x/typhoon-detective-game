@@ -51,7 +51,7 @@ ${text}`;
 /**
  * Translates an object's text fields from one language to another
  */
-export async function translateObject<T extends Record<string, any>>(
+export async function translateObject<T extends Record<string, unknown>>(
     obj: T,
     sourceLanguage: Language,
     targetLanguage: Language,

@@ -1,91 +1,37 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --accent: 124 58 237;  /* Violet-600 in RGB format */
-  --card: 255 255 255;
-  --card-foreground: 23 23 23;
-  --border: 229 229 229;
-  --input: 243 244 246;
-  --ring: 124 58 237;
-
-  /* Light mode */
-  --primary-50: 245, 243, 255;
-  --primary-100: 237, 233, 254;
-  --primary-200: 221, 214, 254;
-  --primary-300: 196, 181, 253;
-  --primary-400: 167, 139, 250;
-  --primary-500: 139, 92, 246;
-  --primary-600: 124, 58, 237;
-  --primary-700: 109, 40, 217;
-  --primary-800: 91, 33, 182;
-  --primary-900: 76, 29, 149;
-  
-  --accent-50: 245, 243, 255;
-  --accent-100: 237, 233, 254;
-  --accent-200: 221, 214, 254;
-  --accent-300: 196, 181, 253;
-  --accent-400: 167, 139, 250;
-  --accent-500: 139, 92, 246;
-  --accent-600: 124, 58, 237;
-  --accent-700: 109, 40, 217;
-  --accent-800: 91, 33, 182;
-  --accent-900: 76, 29, 149;
-  
-  --surface-50: 250, 250, 250;
-  --surface-100: 245, 245, 245;
-  --surface-200: 229, 229, 229;
-  --surface-300: 212, 212, 212;
-  --surface-400: 163, 163, 163;
-  --surface-500: 115, 115, 115;
-  --surface-600: 82, 82, 82;
-  --surface-700: 64, 64, 64;
-  --surface-800: 38, 38, 38;
-  --surface-900: 23, 23, 23;
-  --surface-950: 10, 10, 10;
-  
-  /* Form elements */
-  --input-background: var(--surface-50);
-  --input-border: var(--surface-200);
-  --input-text: var(--surface-900);
-  --input-placeholder: var(--surface-500);
-  --input-focus-border: var(--primary-500);
-  --input-focus-ring: var(--primary-100);
-}
-
-.dark {
-  --background: #09090b;
+  --background: #151515;
   --foreground: #fafafa;
-  --accent: 124 58 237;  /* Keep the same accent color for consistency */
+  --accent: 255 142 0;  /* Borderlands orange */
   --card: 39 39 42;
   --card-foreground: 250 250 250;
   --border: 63 63 70;
   --input: 39 39 42;
-  --ring: 167 139 250;
+  --ring: 255 176 59;
 
-  /* Dark mode */
-  --primary-50: 245, 243, 255;
-  --primary-100: 237, 233, 254;
-  --primary-200: 221, 214, 254;
-  --primary-300: 196, 181, 253;
-  --primary-400: 167, 139, 250;
-  --primary-500: 139, 92, 246;
-  --primary-600: 124, 58, 237;
-  --primary-700: 109, 40, 217;
-  --primary-800: 91, 33, 182;
-  --primary-900: 76, 29, 149;
+  /* Colors - Adjusted for Borderlands theme */
+  --primary-50: 255, 248, 240;
+  --primary-100: 255, 237, 213;
+  --primary-200: 254, 215, 170;
+  --primary-300: 253, 186, 116;
+  --primary-400: 251, 146, 60;
+  --primary-500: 249, 115, 22;
+  --primary-600: 234, 88, 12;
+  --primary-700: 194, 65, 12;
+  --primary-800: 154, 52, 18;
+  --primary-900: 124, 45, 18;
   
-  --accent-50: 245, 243, 255;
-  --accent-100: 237, 233, 254;
-  --accent-200: 221, 214, 254;
-  --accent-300: 196, 181, 253;
-  --accent-400: 167, 139, 250;
-  --accent-500: 139, 92, 246;
-  --accent-600: 124, 58, 237;
-  --accent-700: 109, 40, 217;
-  --accent-800: 91, 33, 182;
-  --accent-900: 76, 29, 149;
+  --accent-50: 255, 248, 240;
+  --accent-100: 255, 237, 213;
+  --accent-200: 254, 215, 170;
+  --accent-300: 253, 186, 116;
+  --accent-400: 251, 146, 60;
+  --accent-500: 249, 115, 22;
+  --accent-600: 234, 88, 12;
+  --accent-700: 194, 65, 12;
+  --accent-800: 154, 52, 18;
+  --accent-900: 124, 45, 18;
   
   --surface-50: 250, 250, 250;
   --surface-100: 245, 245, 245;
@@ -105,21 +51,39 @@
   --input-text: var(--surface-50);
   --input-placeholder: var(--surface-400);
   --input-focus-border: var(--primary-500);
-  --input-focus-ring: rgba(124, 58, 237, 0.2);
+  --input-focus-ring: rgba(249, 115, 22, 0.2);
+
+  /* Comic/Cel-shading variables - Enhanced for Borderlands */
+  --outline-width: 3px;
+  --outline-color: #000000;
+  --cel-shadow-light: #7c2d12;
+  --cel-shadow-dark: #ea580c;
+  --comic-texture: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  
+  /* Borderlands specific */
+  --borderlands-yellow: #ffcc00;
+  --borderlands-orange: #ff8e00;
+  --borderlands-red: #ff3d00;
+  --borderlands-blue: #00a3ff;
+  --borderlands-cell-line: 2px solid black;
+}
+
+/* Force dark theme */
+html {
+  class: dark;
 }
 
 @theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-borderlands);
   --font-mono: var(--font-geist-mono);
 
-  /* Define extended colors for Tailwind 4.0 */
   --primary-950: #2e1065;
 
-  --accent: #7c3aed;
-  --accent-light: #a78bfa;
-  --accent-dark: #5b21b6;
+  --accent: var(--borderlands-orange);
+  --accent-light: var(--borderlands-yellow);
+  --accent-dark: var(--borderlands-red);
 
   --surface-50: #fafafa;
   --surface-100: #f4f4f5;
@@ -138,7 +102,7 @@
   --shadow-medium: 0 4px 20px rgba(0, 0, 0, 0.08);
   --shadow-hard: 0 10px 40px rgba(0, 0, 0, 0.12);
   --shadow-inner-light: inset 0 2px 4px rgba(0, 0, 0, 0.06);
-  --shadow-highlight: 0 0 0 2px rgba(124, 58, 237, 0.2);
+  --shadow-highlight: 0 0 0 2px rgba(255, 142, 0, 0.3);
 }
 
 @keyframes gradient-x {
@@ -149,27 +113,171 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans);
+  font-family: 'Bangers', var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-image: var(--comic-texture);
+  letter-spacing: 0.5px;
+  background-attachment: fixed;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Bangers', cursive;
+  letter-spacing: 1px;
+}
+
+/* Comic book/Cel-shaded styles - Enhanced */
+.comic-border {
+  position: relative;
+  box-shadow: 0 0 0 var(--outline-width) var(--outline-color);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.comic-text {
+  text-shadow: 
+    -2px -2px 0 #000,
+    2px -2px 0 #000,
+    -2px 2px 0 #000,
+    2px 2px 0 #000;
+  letter-spacing: 1px;
+  font-weight: 700;
+  font-family: 'Bangers', cursive;
+}
+
+.cel-shaded {
+  position: relative;
+  box-shadow: 
+    inset 0 5px 15px rgba(255, 255, 255, 0.1),
+    inset 0 -5px 15px rgba(0, 0, 0, 0.3),
+    0 0 0 var(--outline-width) var(--outline-color);
+  transition: all 0.3s ease;
+  border: var(--borderlands-cell-line);
+}
+
+.cel-shaded:hover {
+  box-shadow: 
+    inset 0 8px 20px rgba(255, 255, 255, 0.15),
+    inset 0 -8px 20px rgba(0, 0, 0, 0.4),
+    0 0 0 var(--outline-width) var(--outline-color);
+  transform: scale(1.02);
+}
+
+.comic-panel {
+  position: relative;
+  background-color: #27272a;
+  padding: 1rem;
+  box-shadow: 
+    0 0 0 var(--outline-width) var(--outline-color),
+    5px 5px 0 rgba(0, 0, 0, 0.5);
+  transform: rotate(-0.5deg);
+  transition: transform 0.3s ease;
+  border: var(--borderlands-cell-line);
+}
+
+.comic-panel:hover {
+  transform: rotate(0deg) scale(1.02);
+}
+
+.borderlands-border {
+  border: 3px solid black;
+  position: relative;
+}
+
+.borderlands-border::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border: 2px solid var(--borderlands-yellow);
+  opacity: 0.6;
+  z-index: -1;
+}
+
+.bg-grid {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgb(255 255 255 / 10%) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 10%) 1px, transparent 1px);
 }
 
 /* Subtle patterns and gradients */
 .bg-mesh {
   background-color: rgb(var(--accent));
-  background-image: radial-gradient(at 60% 35%, rgb(167 139 250 / 40%) 0px, transparent 50%),
-    radial-gradient(at 10% 75%, rgb(91 33 182 / 30%) 0px, transparent 50%);
+  background-image: 
+    radial-gradient(at 60% 35%, rgb(253 186 116 / 40%) 0px, transparent 50%),
+    radial-gradient(at 10% 75%, rgb(194 65 12 / 30%) 0px, transparent 50%);
 }
 
-.bg-grid {
-  background-size: 40px 40px;
-  background-image: linear-gradient(to right, rgb(243 244 246 / 10%) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(243 244 246 / 10%) 1px, transparent 1px);
+/* Force dark theme for overview and case sections */
+.bg-white {
+  background-color: #27272a !important;
 }
 
-.dark .bg-grid {
-  background-image: linear-gradient(to right, rgb(39 39 42 / 40%) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(39 39 42 / 40%) 1px, transparent 1px);
+.text-gray-600, .text-gray-500 {
+  color: #a1a1aa !important;
+}
+
+.bg-gray-100, .bg-gray-50 {
+  background-color: #3f3f46 !important;
+}
+
+.bg-gray-200 {
+  background-color: #52525b !important;
+}
+
+.border-gray-200, .border-gray-300 {
+  border-color: #52525b !important;
+}
+
+/* Make sure all panels have dark backgrounds */
+div[class*="rounded-lg"] {
+  background-color: #27272a;
+  border: var(--borderlands-cell-line);
+}
+
+/* Borderlands UI Elements */
+.borderlands-btn {
+  background: var(--borderlands-orange);
+  border: 3px solid black;
+  color: white;
+  box-shadow: 
+    inset 0 0 0 1px var(--borderlands-yellow),
+    0 4px 0 0 black;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-family: 'Bangers', cursive;
+  transform: skew(-5deg);
+  transition: all 0.2s ease;
+}
+
+.borderlands-btn:hover {
+  transform: skew(-5deg) translateY(-2px);
+  box-shadow: 
+    inset 0 0 0 1px var(--borderlands-yellow),
+    0 6px 0 0 black;
+}
+
+.borderlands-btn:active {
+  transform: skew(-5deg) translateY(2px);
+  box-shadow: 
+    inset 0 0 0 1px var(--borderlands-yellow),
+    0 2px 0 0 black;
+}
+
+.borderlands-panel {
+  background: #27272a;
+  border: 3px solid black;
+  position: relative;
+  box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.7);
+}
+
+.borderlands-panel::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border: 2px solid var(--borderlands-yellow);
+  opacity: 0.6;
+  z-index: -1;
 }
 
 /* Utility classes for colors */
@@ -261,8 +369,8 @@ body {
 
 /* Form elements */
 input, textarea, select {
-  background-color: var(--surface-50);
-  border-color: var(--surface-200);
+  background-color: var(--surface-800);
+  border-color: var(--surface-700);
   border-width: 1px;
   border-radius: 0.5rem;
   padding-left: 1rem;
@@ -279,11 +387,6 @@ input:focus, textarea:focus, select:focus {
   --ring-width: 2px;
 }
 
-.dark input, .dark textarea, .dark select {
-  background-color: var(--surface-800);
-  border-color: var(--surface-700);
-}
-
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
@@ -291,27 +394,14 @@ input:focus, textarea:focus, select:focus {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(243, 244, 246, 0.1);
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(161, 161, 170, 0.5);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(113, 113, 122, 0.7);
-}
-
-.dark ::-webkit-scrollbar-track {
   background: rgba(39, 39, 42, 0.3);
 }
 
-.dark ::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb {
   background: rgba(82, 82, 91, 0.5);
 }
 
-.dark ::-webkit-scrollbar-thumb:hover {
+::-webkit-scrollbar-thumb:hover {
   background: rgba(113, 113, 122, 0.7);
 }
 
@@ -467,28 +557,12 @@ input:focus, textarea:focus, select:focus {
 
 /* Utility classes */
 .text-shadow {
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.dark .text-shadow {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 /* High contrast mode */
 @media (prefers-contrast: high) {
   :root {
-    --primary-500: 109, 40, 217;
-    --primary-600: 91, 33, 182;
-    --accent-500: 109, 40, 217;
-    --accent-600: 91, 33, 182;
-    --surface-100: 229, 229, 229;
-    --surface-200: 212, 212, 212;
-    --surface-300: 163, 163, 163;
-    --surface-700: 38, 38, 38;
-    --surface-800: 23, 23, 23;
-  }
-  
-  .dark {
     --primary-400: 139, 92, 246;
     --primary-500: 167, 139, 250;
     --accent-400: 139, 92, 246;
@@ -506,12 +580,6 @@ input:focus, textarea:focus, select:focus {
   
   /* Strengthen focus states */
   input:focus, textarea:focus, select:focus {
-    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.3);
-  }
-  
-  .dark input:focus, 
-  .dark textarea:focus, 
-  .dark select:focus {
     box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
   }
 }

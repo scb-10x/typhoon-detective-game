@@ -32,18 +32,18 @@ export default function Home() {
   return (
     <Layout>
       <div className="flex flex-col items-center justify-center py-8 md:py-16">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4 text-center">
+        <h1 className="text-5xl md:text-6xl font-black comic-text mb-6 text-center text-[var(--borderlands-yellow)] transform -rotate-1">
           {t('app.title')}
         </h1>
-        <p className="text-lg md:text-xl mb-8 text-center">
+        <p className="text-lg md:text-xl mb-10 text-center font-bold comic-text text-white">
           {t('app.subtitle')}
         </p>
 
         <div className="max-w-lg w-full">
           {activeCase ? (
-            <div className="flex flex-col gap-6 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-              <h2 className="text-2xl font-semibold">{activeCase.title}</h2>
-              <p className="opacity-80">{activeCase.summary}</p>
+            <div className="borderlands-panel flex flex-col gap-6 p-6 bg-surface-800 transform rotate-1">
+              <h2 className="text-3xl font-black comic-text text-[var(--borderlands-yellow)]">{activeCase.title}</h2>
+              <p className="opacity-80 font-bold">{activeCase.summary}</p>
               <div className="flex flex-col sm:flex-row gap-4 mt-4">
                 <Button
                   variant="accent"
@@ -64,9 +64,9 @@ export default function Home() {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col gap-6 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-              <h2 className="text-2xl font-semibold">{t('game.start')}</h2>
-              <p className="opacity-80">
+            <div className="borderlands-panel flex flex-col gap-6 p-6 bg-surface-800 transform -rotate-1">
+              <h2 className="text-3xl font-black comic-text text-[var(--borderlands-yellow)]">{t('game.start')}</h2>
+              <p className="opacity-80 font-bold">
                 Start a new investigation and solve a detective case. Use your deduction skills to analyze clues, interview suspects, and solve the mystery.
               </p>
               <Button
@@ -81,17 +81,17 @@ export default function Home() {
           )}
 
           {/* Reset Game Button */}
-          <div className="mt-8 text-center">
+          <div className="mt-10 text-center">
             <Button
-              variant="outline"
+              variant={showResetConfirm ? "accent" : "outline"}
               size="sm"
               onClick={handleResetGame}
-              className={showResetConfirm ? "bg-red-500 text-white hover:bg-red-600 border-red-500" : ""}
+              className={showResetConfirm ? "bg-[var(--borderlands-red)] text-white border-black" : "border-black"}
             >
               {showResetConfirm ? "Confirm Reset Game" : "Reset Game"}
             </Button>
             {showResetConfirm && (
-              <p className="text-sm mt-2 text-red-500">
+              <p className="text-sm mt-2 text-[var(--borderlands-red)] font-bold comic-text">
                 Warning: This will delete all your progress and start over with sample cases.
               </p>
             )}
