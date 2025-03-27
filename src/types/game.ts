@@ -116,8 +116,4 @@ export interface CaseSolution {
     reasoning: string;
     evidenceIds: string[];
     narrative: string;
-    correct?: boolean;
-    explanation?: string;
-    feedback?: string;
-    nextSteps?: string;
 } 

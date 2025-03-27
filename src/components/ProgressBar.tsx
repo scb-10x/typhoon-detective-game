@@ -63,8 +63,8 @@ export default function ProgressBar({
                             : 'bg-surface-300 dark:bg-surface-600'
                             }`} />
                         <span className={`text-xs font-medium text-center ${isDiscoveryActive
-                                ? 'text-primary-900 dark:text-primary-300'
-                                : 'text-surface-600 dark:text-surface-400'
+                            ? 'text-primary-900 dark:text-primary-300'
+                            : 'text-surface-600 dark:text-surface-400'
                             }`}>
                             {t('progress.discovery')}
                         </span>
@@ -77,8 +77,8 @@ export default function ProgressBar({
                             : 'bg-surface-300 dark:bg-surface-600'
                             }`} />
                         <span className={`text-xs font-medium text-center ${isAnalysisActive
-                                ? 'text-primary-900 dark:text-primary-300'
-                                : 'text-surface-600 dark:text-surface-400'
+                            ? 'text-primary-900 dark:text-primary-300'
+                            : 'text-surface-600 dark:text-surface-400'
                             }`}>
                             {t('progress.analysis')}
                         </span>
@@ -91,8 +91,8 @@ export default function ProgressBar({
                             : 'bg-surface-300 dark:bg-surface-600'
                             }`} />
                         <span className={`text-xs font-medium text-center ${isInterviewActive
-                                ? 'text-primary-900 dark:text-primary-300'
-                                : 'text-surface-600 dark:text-surface-400'
+                            ? 'text-primary-900 dark:text-primary-300'
+                            : 'text-surface-600 dark:text-surface-400'
                             }`}>
                             {t('progress.interview')}
                         </span>
@@ -105,8 +105,8 @@ export default function ProgressBar({
                             : 'bg-surface-300 dark:bg-surface-600'
                             }`} />
                         <span className={`text-xs font-medium text-center ${isSolutionActive
-                                ? 'text-primary-900 dark:text-primary-300'
-                                : 'text-surface-600 dark:text-surface-400'
+                            ? 'text-primary-900 dark:text-primary-300'
+                            : 'text-surface-600 dark:text-surface-400'
                             }`}>
                             {t('progress.solution')}
                         </span>

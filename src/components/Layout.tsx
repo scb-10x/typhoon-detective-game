@@ -1,207 +1,146 @@
-'use client';
-
 import React, { useState, useEffect } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { FiHome, FiFolder, FiSearch, FiUsers, FiSettings, FiMenu, FiX } from 'react-icons/fi';
-import { useGame } from '@/contexts/GameContext';
+import { usePathname } from 'next/navigation';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useGame } from '@/contexts/GameContext';
+import {
+    FaHome,
+    FaClipboardList,
+    FaSearch,
+    FaUser,
+    FaCog,
+    FaSun,
+    FaMoon
+} from 'react-icons/fa';
 import ProgressBar from './ProgressBar';
 
-interface LayoutProps {
-    children: React.ReactNode;
-}
-
-const Layout: React.FC<LayoutProps> = ({ children }) => {
-    const { t } = useLanguage();
-    const { setLanguage, language } = useLanguage();
-    const { state } = useGame();
-    const { gameState } = state;
+export default function Layout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const progressPercentage = Math.round(gameState.gameProgress * 100);
-    const router = useRouter();
+    const { language, setLanguage, t } = useLanguage();
+    const { theme, setTheme } = useTheme();
+    const { state, dispatch } = useGame();
+    const { gameState } = state;
+    const [progress, setProgress] = useState(0);
+    const [isScrolled, setIsScrolled] = useState(false);
 
-    // Handle mobile menu
-    const toggleMenu = () => {
-        setIsMenuOpen(!isMenuOpen);
-    };
-
-    // Close menu on navigation or resize
     useEffect(() => {
-        const handleResize = () => {
-            if (window.innerWidth > 768) {
-                setIsMenuOpen(false);
-            }
+        const handleScroll = () => {
+            setIsScrolled(window.scrollY > 10);
         };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, [pathname]);
+    useEffect(() => {
+        if (gameState.activeCase) {
+            setProgress(gameState.gameProgress);
+        } else {
+            setProgress(0);
+        }
+    }, [gameState]);
 
     const navItems = [
-        { label: t('nav.home'), href: '/', icon: <FiHome className="text-lg" /> },
-        { label: t('nav.cases'), href: '/cases', icon: <FiFolder className="text-lg" /> },
-        { label: t('nav.clues'), href: '/clues', icon: <FiSearch className="text-lg" /> },
-        { label: t('nav.suspects'), href: '/suspects', icon: <FiUsers className="text-lg" /> },
-        { label: t('nav.settings'), href: '/settings', icon: <FiSettings className="text-lg" /> },
+        { href: '/', icon: <FaHome className="text-lg" />, label: t('nav.home') },
+        { href: '/cases', icon: <FaClipboardList className="text-lg" />, label: t('nav.cases') },
+        { href: '/clues', icon: <FaSearch className="text-lg" />, label: t('nav.clues') },
+        { href: '/suspects', icon: <FaUser className="text-lg" />, label: t('nav.suspects') },
+        { href: '/settings', icon: <FaCog className="text-lg" />, label: t('nav.settings') }
     ];
 
     return (
-        <div className="flex flex-col min-h-screen">
-            {/* Header */}
-            <header className="glass-effect sticky top-0 z-50 backdrop-blur-md border-b border-surface-700/30">
-                <div className="container mx-auto px-4 md:px-6">
-                    <div className="flex items-center justify-between h-16">
-                        {/* Logo */}
-                        <Link href="/" className="flex items-center space-x-2">
-                            <div className="bg-gradient-purple text-white p-2 rounded-lg shadow-md">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="24"
-                                    height="24"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    className="text-white"
-                                >
-                                    <path d="M14.5 4h-5L7 7H4a2 2 0 00-2 2v9a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2h-3l-2.5-3z" />
-                                    <circle cx="12" cy="13" r="3" />
-                                </svg>
-                            </div>
-                            <span className="font-bold text-2xl text-high-contrast">
-                                {t('app.title')}
-                            </span>
+        <div className="flex flex-col min-h-screen bg-gradient-to-br from-surface-50 to-surface-100 dark:from-surface-950 dark:to-surface-900">
+            <header
+                className={`sticky top-0 z-50 backdrop-blur-md border-b border-surface-200/30 dark:border-surface-800/30 transition-all duration-300 ${isScrolled ? 'bg-white/70 dark:bg-surface-950/70 shadow-md' : 'bg-white/30 dark:bg-surface-950/30'
+                    }`}
+            >
+                <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                        <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent">
+                            {t('app.title')}
                         </Link>
-
-                        {/* Desktop Nav */}
-                        <nav className="hidden md:flex space-x-8">
-                            {navItems.map((item) => (
-                                <Link
-                                    key={item.href}
-                                    href={item.href}
-                                    className={`flex items-center gap-1.5 text-lg transition-all hover:text-primary-300 font-medium
-                    ${pathname === item.href
-                                            ? 'text-primary-400 glow-sm'
-                                            : 'text-medium-contrast'
-                                        }`}
-                                >
-                                    {item.icon}
-                                    <span>{item.label}</span>
-                                </Link>
-                            ))}
-                        </nav>
-
-                        {/* Language Switch & Mobile Menu Button */}
-                        <div className="flex items-center gap-4">
-                            <div className="hidden md:flex items-center space-x-2 bg-surface-800/70 rounded-full p-1 shadow-inner-glow">
-                                <button
-                                    onClick={() => setLanguage('en')}
-                                    className={`px-3 py-1 rounded-full text-sm font-medium transition-all ${language === 'en'
-                                        ? 'bg-primary-700 text-white shadow-sm'
-                                        : 'text-surface-400 hover:text-white'
-                                        }`}
-                                >
-                                    EN
-                                </button>
-                                <button
-                                    onClick={() => setLanguage('th')}
-                                    className={`px-3 py-1 rounded-full text-sm font-medium transition-all ${language === 'th'
-                                        ? 'bg-primary-700 text-white shadow-sm'
-                                        : 'text-surface-400 hover:text-white'
-                                        }`}
-                                >
-                                    TH
-                                </button>
-                            </div>
-
-                            {/* Mobile menu button */}
-                            <button
-                                className="md:hidden text-2xl p-1 rounded-lg hover:bg-surface-800"
-                                onClick={toggleMenu}
-                            >
-                                {isMenuOpen ? <FiX /> : <FiMenu />}
-                            </button>
-                        </div>
+                        <span className="text-xs text-surface-500 dark:text-surface-400 px-2 py-1 rounded-full border border-surface-200 dark:border-surface-700">
+                            {t('app.subtitle')}
+                        </span>
                     </div>
-                </div>
-            </header>
 
-            {/* Mobile menu */}
-            {isMenuOpen && (
-                <div className="md:hidden glass-effect border-b border-primary-800/20 shadow-lg">
-                    <nav className="container mx-auto px-4 py-4 flex flex-col space-y-3">
-                        {navItems.map((item) => (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                className={`flex items-center gap-2 p-2 rounded-lg text-lg transition-all
-                  ${pathname === item.href
-                                        ? 'bg-primary-900/50 text-primary-300'
-                                        : 'text-medium-contrast hover:bg-surface-800/50'
-                                    }`}
-                                onClick={() => setIsMenuOpen(false)}
-                            >
-                                {item.icon}
-                                <span>{item.label}</span>
-                            </Link>
-                        ))}
-
-                        {/* Language switch on mobile */}
-                        <div className="flex items-center justify-center gap-2 mt-2 py-2 border-t border-surface-800">
-                            <span className="text-low-contrast">{t('language.select')}:</span>
+                    <div className="flex items-center space-x-4">
+                        <div className="flex rounded-full bg-surface-100 dark:bg-surface-800 p-1">
                             <button
                                 onClick={() => setLanguage('en')}
-                                className={`px-3 py-1 rounded-md text-sm font-medium transition-all ${language === 'en'
-                                    ? 'bg-primary-700 text-white'
-                                    : 'bg-surface-800 text-surface-400 hover:text-white'
+                                className={`px-3 py-1 text-sm rounded-full transition-all ${language === 'en'
+                                    ? 'bg-primary-600 text-white shadow-sm'
+                                    : 'text-surface-600 dark:text-surface-300 hover:bg-surface-200 dark:hover:bg-surface-700'
                                     }`}
                             >
                                 EN
                             </button>
                             <button
                                 onClick={() => setLanguage('th')}
-                                className={`px-3 py-1 rounded-md text-sm font-medium transition-all ${language === 'th'
-                                    ? 'bg-primary-700 text-white'
-                                    : 'bg-surface-800 text-surface-400 hover:text-white'
+                                className={`px-3 py-1 text-sm rounded-full transition-all ${language === 'th'
+                                    ? 'bg-primary-600 text-white shadow-sm'
+                                    : 'text-surface-600 dark:text-surface-300 hover:bg-surface-200 dark:hover:bg-surface-700'
                                     }`}
                             >
                                 TH
                             </button>
                         </div>
-                    </nav>
+
+                        <button
+                            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                            className="p-2 rounded-full bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-300 hover:bg-surface-200 dark:hover:bg-surface-700 transition-all"
+                            aria-label={theme === 'dark' ? t('settings.switch_to_light') : t('settings.switch_to_dark')}
+                        >
+                            {theme === 'dark' ? <FaSun className="text-amber-400" /> : <FaMoon className="text-indigo-400" />}
+                        </button>
+                    </div>
                 </div>
-            )}
 
-            {/* Progress bar */}
-            <div className="container mx-auto px-4 md:px-6 py-3">
-                <ProgressBar
-                    progress={progressPercentage}
-                    showText={true}
-                    showSteps={false}
-                    size="md"
-                />
-            </div>
+                {gameState.activeCase && (
+                    <div className="container mx-auto px-4 pb-2">
+                        <div className="flex items-center justify-between">
+                            <div className="w-full max-w-3xl mx-auto">
+                                <ProgressBar
+                                    progress={progress}
+                                    showText={true}
+                                    showSteps={true}
+                                    size="md"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </header>
 
-            {/* Main content */}
-            <main className="flex-1 container mx-auto px-4 md:px-6 py-6">
+            <main className="flex-grow container mx-auto px-4 py-6">
                 {children}
             </main>
 
-            {/* Footer */}
-            <footer className="container-dark border-t border-primary-900/30 mt-auto">
-                <div className="container mx-auto px-4 md:px-6 py-4">
-                    <div className="text-center text-low-contrast text-sm">
-                        <p>{t('footer.copyright')}</p>
-                        <p className="mt-1">{t('footer.rights')}</p>
-                    </div>
+            <nav className="sticky bottom-0 border-t border-surface-200/30 dark:border-surface-800/30 bg-white/80 dark:bg-surface-950/80 backdrop-blur-md py-2 px-4">
+                <div className="container mx-auto flex justify-between items-center max-w-md">
+                    {navItems.map((item) => (
+                        <Link
+                            key={item.href}
+                            href={item.href}
+                            className={`flex flex-col items-center p-2 rounded-lg transition-all ${pathname === item.href
+                                ? 'text-primary-600 dark:text-primary-400'
+                                : 'text-surface-600 dark:text-surface-400 hover:text-primary-500 dark:hover:text-primary-300'
+                                }`}
+                        >
+                            <div className={`mb-1 ${pathname === item.href
+                                ? 'scale-110 text-primary-600 dark:text-primary-400'
+                                : 'text-surface-500 dark:text-surface-400'
+                                }`}>
+                                {item.icon}
+                            </div>
+                            <span className="text-xs font-medium">{item.label}</span>
+                            {pathname === item.href && (
+                                <div className="h-1 w-6 bg-primary-600 dark:bg-primary-400 rounded-full mt-1"></div>
+                            )}
+                        </Link>
+                    ))}
                 </div>
-            </footer>
+            </nav>
         </div>
     );
-};
-
-export default Layout;
+}

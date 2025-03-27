@@ -1,6 +1,5 @@
 import React from 'react';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
 
 interface CardProps {
     title: string;
@@ -21,103 +20,74 @@ export default function Card({
     footer,
     onClick,
     highlighted = false,
-    discovered = true,
+    discovered = false,
     children,
     className = '',
 }: CardProps) {
-    const cardVariants = {
-        initial: { opacity: 0, y: 20 },
-        animate: { opacity: 1, y: 0, transition: { duration: 0.4 } },
-        hover: { y: -5, boxShadow: '0 10px 30px -5px rgba(0, 0, 0, 0.3)' },
-        tap: { y: 0, scale: 0.98 },
-    };
+    const baseClasses = 'rounded-lg overflow-hidden transition-all duration-200 h-full flex flex-col';
 
-    // Base classes for all cards
-    const baseClasses = `
-        card-dark relative flex flex-col overflow-hidden
-        transition-all duration-300
-        ${onClick ? 'cursor-pointer' : ''}
+    const cardClasses = `
+        ${baseClasses}
+        ${highlighted
+            ? 'bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/40 dark:to-primary-800/30 border border-primary-200 dark:border-primary-700 shadow-md'
+            : 'bg-white dark:bg-surface-800 border border-surface-200 dark:border-surface-700 hover:shadow-md dark:hover:shadow-surface-900/50'
+        }
+        ${onClick ? 'cursor-pointer hover:translate-y-[-2px]' : ''}
+        ${discovered ? 'opacity-100' : ''}
+        ${!discovered && highlighted ? 'opacity-90 hover:opacity-100' : ''}
         ${className}
     `;
 
-    // Classes for highlighted and discovered states
-    const stateClasses = highlighted
-        ? 'ring-2 ring-primary-500 glow-sm'
-        : discovered
-            ? ''
-            : 'opacity-80 grayscale';
-
     return (
-        <motion.div
-            className={`${baseClasses} ${stateClasses}`}
-            variants={cardVariants}
-            initial="initial"
-            animate="animate"
-            whileHover={onClick ? "hover" : undefined}
-            whileTap={onClick ? "tap" : undefined}
+        <div
+            className={cardClasses}
             onClick={onClick}
+            role={onClick ? 'button' : undefined}
+            tabIndex={onClick ? 0 : undefined}
         >
-            {/* Card image if provided */}
+            {/* Card image */}
             {image && (
-                <div className="relative w-full h-48 overflow-hidden">
+                <div className="relative w-full h-40 overflow-hidden">
                     <Image
                         src={image}
                         alt={title}
-                        className="object-cover"
                         fill
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="object-cover transition-transform hover:scale-105"
                     />
-                    {/* Gradient overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-surface-900/90 to-transparent" />
+
+                    {/* Discovery badge */}
+                    {!discovered && (
+                        <div className="absolute top-2 right-2 bg-surface-800/80 text-white text-xs font-medium px-2 py-1 rounded-full">
+                            Undiscovered
+                        </div>
+                    )}
                 </div>
             )}
 
-            {/* Card content */}
-            <div className={`flex-1 p-5 ${image ? '-mt-8 relative z-10' : ''}`}>
-                <h3 className="text-high-contrast text-xl font-semibold mb-2">{title}</h3>
+            {/* Card body */}
+            <div className="flex-1 p-4">
+                <h3 className="text-lg font-bold text-surface-900 dark:text-surface-50 mb-2">{title}</h3>
 
                 {description && (
-                    <p className="text-medium-contrast text-sm mb-4">{description}</p>
+                    <p className="text-surface-700 dark:text-surface-300 text-sm">
+                        {description}
+                    </p>
                 )}
 
-                {children}
+                {children && <div className="mt-3">{children}</div>}
             </div>
 
-            {/* Highlighted indicator */}
-            {highlighted && (
-                <div className="absolute top-0 right-0">
-                    <div className="w-0 h-0 border-t-[40px] border-r-[40px] border-t-transparent border-r-primary-600">
-                        <div className="absolute top-[-38px] right-[-33px] transform rotate-45 text-white">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                        </div>
-                    </div>
+            {/* Card footer */}
+            {footer && (
+                <div className="p-4 pt-2 mt-auto border-t border-surface-200 dark:border-surface-700">
+                    {footer}
                 </div>
             )}
 
-            {/* Not discovered overlay */}
-            {!discovered && (
-                <div className="absolute inset-0 bg-surface-900/80 backdrop-blur-sm flex items-center justify-center">
-                    <div className="p-4 text-center">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-10 w-10 mx-auto mb-2 text-surface-400"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={1.5}
-                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                            />
-                        </svg>
-                        <p className="text-surface-300 font-medium">Not yet discovered</p>
-                    </div>
-                </div>
+            {/* Highlight indicator */}
+            {highlighted && (
+                <div className="h-1 bg-gradient-to-r from-primary-500 to-accent-500 w-full"></div>
             )}
-        </motion.div>
+        </div>
     );
 }

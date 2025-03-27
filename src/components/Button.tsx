@@ -27,15 +27,15 @@ export default function Button({
     const { t } = useLanguage();
 
     // Define base classes
-    const baseClasses = 'font-medium rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-900 transition-all flex items-center justify-center shadow-sm';
+    const baseClasses = 'font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all flex items-center justify-center';
 
-    // Classes based on variant - dark mode only
+    // Classes based on variant
     const variantClasses = {
-        primary: 'bg-gradient-purple text-white hover:brightness-110 active:translate-y-0.5 focus-visible:ring-primary-400',
-        secondary: 'bg-surface-800 text-high-contrast border border-surface-700 hover:bg-surface-700 active:translate-y-0.5 focus-visible:ring-surface-600',
-        accent: 'bg-accent-600 text-white hover:bg-accent-500 active:translate-y-0.5 focus-visible:ring-accent-400',
-        outline: 'bg-transparent border-2 border-primary-700 text-medium-contrast hover:bg-primary-900/20 hover:text-high-contrast active:translate-y-0.5 focus-visible:ring-primary-400',
-        ghost: 'bg-transparent text-medium-contrast hover:bg-surface-800 hover:text-high-contrast active:translate-y-0.5 focus-visible:ring-surface-600',
+        primary: 'bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white focus:ring-primary-500 dark:bg-primary-500 dark:hover:bg-primary-600 dark:focus:ring-primary-400',
+        secondary: 'bg-surface-200 hover:bg-surface-300 active:bg-surface-400 text-surface-800 focus:ring-surface-300 dark:bg-surface-700 dark:hover:bg-surface-600 dark:text-surface-50 dark:focus:ring-surface-500',
+        accent: 'bg-accent-600 hover:bg-accent-700 active:bg-accent-800 text-white focus:ring-accent-500 dark:bg-accent-500 dark:hover:bg-accent-600 dark:focus:ring-accent-400',
+        outline: 'border border-surface-300 hover:bg-surface-100 text-surface-800 focus:ring-surface-200 dark:border-surface-600 dark:hover:bg-surface-800 dark:text-surface-100 dark:focus:ring-surface-700',
+        ghost: 'hover:bg-surface-100 text-surface-800 focus:ring-surface-200 dark:hover:bg-surface-800 dark:text-surface-100 dark:focus:ring-surface-700',
     };
 
     // Classes based on size
@@ -51,7 +51,7 @@ export default function Button({
     ${variantClasses[variant]}
     ${sizeClasses[size]}
     ${fullWidth ? 'w-full' : ''}
-    ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-md'}
+    ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}
     ${className}
   `;
 

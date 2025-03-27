@@ -1,13 +1,15 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { FaArrowLeft, FaCheck, FaMagnifyingGlass, FaLink } from 'react-icons/fa6';
+import Image from 'next/image';
 import Layout from '@/components/Layout';
 import Button from '@/components/Button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useGame } from '@/contexts/GameContext';
-import Image from 'next/image';
+import { analyzeClue } from '@/lib/clueAnalyzer';
+import { ClueAnalysis } from '@/types/game';
+import { FiArrowLeft, FiFileText, FiUser } from 'react-icons/fi';
 
 interface CluePageProps {
     params: {
@@ -18,233 +20,226 @@ interface CluePageProps {
 export default function CluePage({ params }: CluePageProps) {
     const router = useRouter();
     const { t } = useLanguage();
-    const { state, dispatch } = useGame();
-    const { clues, cases, suspects, gameState } = state;
+    const { cases, clues, suspects, dispatch } = useGame();
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [analysisResult, setAnalysisResult] = useState<ClueAnalysis | null>(null);
+    const [error, setError] = useState<string | null>(null);
+
+    // Use id directly from params - Next.js still supports this while migrating
+    const clueId = params.id;
 
     // Find the clue by ID
-    const clue = clues.find(c => c.id === params.id);
+    const clue = clues.find(c => c.id === clueId);
 
-    // Get related case
-    const relatedCase = clue ? cases.find(c => c.id === clue.caseId) : null;
+    // Get related case and suspects
+    const caseData = clue ? cases.find(c => c.id === clue.caseId) : null;
+    const relatedSuspects = clue?.relatedSuspectIds?.map(id =>
+        suspects.find(s => s.id === id)
+    ).filter(Boolean) || [];
 
-    // Get related suspects
-    const relatedSuspects = clue
-        ? suspects.filter(s =>
-            s.caseId === clue.caseId &&
-            clue.relatedSuspects?.includes(s.id)
-        )
-        : [];
+    // Check if clue has been examined
+    const isExamined = clue?.examined || false;
 
-    // Set the clue as examined when the page loads
+    // Mark clue as examined when first viewed
     useEffect(() => {
-        if (clue && !gameState.examinedClues.includes(clue.id)) {
-            dispatch({ type: 'EXAMINE_CLUE', payload: clue.id });
+        if (clue && !isExamined) {
+            dispatch({
+                type: 'EXAMINE_CLUE',
+                payload: { id: clue.id }
+            });
         }
-    }, [clue, dispatch, gameState.examinedClues]);
+    }, [clue, dispatch, isExamined]);
 
-    // Handle clipboard operations safely
-    const copyToClipboard = async (text: string) => {
-        try {
-            if (navigator.clipboard) {
-                await navigator.clipboard.writeText(text);
-                alert(t('common.copied_to_clipboard'));
-            } else {
-                // Fallback method
-                const textarea = document.createElement('textarea');
-                textarea.value = text;
-                textarea.style.position = 'fixed';
-                document.body.appendChild(textarea);
-                textarea.focus();
-                textarea.select();
-
-                try {
-                    document.execCommand('copy');
-                    alert(t('common.copied_to_clipboard'));
-                } catch (err) {
-                    console.error('Fallback copy failed:', err);
-                }
-
-                document.body.removeChild(textarea);
-            }
-        } catch (err) {
-            console.error('Copy failed:', err);
-            alert(t('common.clipboard_not_supported'));
-        }
-    };
-
-    if (!clue) {
+    // Handle clue not found
+    if (!clue || !caseData) {
         return (
             <Layout>
                 <div className="text-center py-12">
-                    <h1 className="text-2xl font-bold mb-4 text-high-contrast">{t('clue.not_found')}</h1>
-                    <p className="mb-6 text-medium-contrast">{t('clue.does_not_exist')}</p>
+                    <h1 className="text-2xl font-bold mb-4">{t('clue.not_found')}</h1>
+                    <p className="mb-6">{t('clue.does_not_exist')}</p>
                     <Button
                         variant="primary"
-                        onClick={() => router.push('/clues')}
+                        onClick={() => router.push('/cases')}
                     >
-                        {t('nav.back_to_clues')}
+                        {t('nav.back_to_cases')}
                     </Button>
                 </div>
             </Layout>
         );
     }
 
+    const handleAnalyzeClue = async () => {
+        setIsAnalyzing(true);
+        setError(null);
+
+        try {
+            const result = await analyzeClue(clue);
+            setAnalysisResult(result);
+        } catch (err) {
+            setError(t('clue.analysis_failed'));
+            console.error(err);
+        } finally {
+            setIsAnalyzing(false);
+        }
+    };
+
+    const handleViewSuspect = (suspectId: string) => {
+        router.push(`/suspects/${suspectId}`);
+    };
+
     return (
         <Layout>
-            <div className="mb-8">
-                {/* Clue header */}
-                <div className="flex items-center mb-6">
-                    <button
-                        onClick={() => router.back()}
-                        className="mr-4 p-2 rounded-full hover:bg-surface-700"
-                        aria-label={t('nav.back')}
-                    >
-                        <FaArrowLeft />
-                    </button>
-                    <div>
-                        <h1 className="text-2xl font-bold text-high-contrast">{clue.title}</h1>
-                        <div className="flex items-center mt-1">
-                            {relatedCase && (
-                                <button
-                                    className="text-sm text-primary-400 hover:text-primary-300 transition-colors"
-                                    onClick={() => router.push(`/cases/${relatedCase.id}`)}
-                                >
-                                    {relatedCase.title}
-                                </button>
-                            )}
-                            <span className="inline-flex items-center ml-3 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-900 text-green-200">
-                                <FaCheck className="mr-1" size={10} />
-                                {t('clue.examined')}
-                            </span>
-                        </div>
-                    </div>
-                </div>
+            <div className="mb-6">
+                <Button
+                    onClick={() => router.push(`/cases/${clue.caseId}`)}
+                    variant="outline"
+                    className="flex items-center gap-2"
+                >
+                    <FiArrowLeft size={16} />
+                    {t('nav.back')}
+                </Button>
+            </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-2 space-y-6">
-                        {/* Clue image */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Main clue info */}
+                <div className="md:col-span-2 space-y-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                        <h1 className="text-2xl font-bold mb-4">{clue.name}</h1>
+
                         {clue.imageUrl && (
-                            <div className="relative h-80 w-full rounded-lg overflow-hidden">
+                            <div className="mb-6 relative h-64 w-full">
                                 <Image
                                     src={clue.imageUrl}
-                                    alt={clue.title}
+                                    alt={clue.name}
                                     fill
-                                    className="object-cover"
+                                    className="object-contain rounded"
                                 />
                             </div>
                         )}
 
-                        {/* Clue description */}
-                        <div className="card-dark p-6">
-                            <h2 className="text-xl font-semibold mb-4 text-high-contrast">{t('clue.description')}</h2>
-                            <p className="whitespace-pre-wrap text-medium-contrast">
-                                {clue.description}
-                            </p>
+                        <div className="grid grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">{t('clue.type')}</div>
+                                <div className="font-medium">{clue.type}</div>
+                            </div>
+                            <div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">{t('clue.condition')}</div>
+                                <div className="font-medium">{clue.condition}</div>
+                            </div>
                         </div>
 
-                        {/* Analysis */}
-                        <div className="card-dark p-6">
-                            <h2 className="text-xl font-semibold mb-4 text-high-contrast">{t('clue.analysis')}</h2>
-                            <div className="bg-surface-800 p-4 rounded-lg mb-4">
-                                <div className="flex items-center mb-2">
-                                    <FaMagnifyingGlass className="text-primary-400 mr-2" />
-                                    <h3 className="font-medium text-high-contrast">{t('clue.analysis_results')}</h3>
-                                </div>
-                                <p className="whitespace-pre-wrap text-medium-contrast">
-                                    {clue.analysis || t('clue.no_analysis')}
-                                </p>
+                        <div className="mb-6">
+                            <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">{t('clue.description')}</div>
+                            <div className="font-medium">{clue.description}</div>
+                        </div>
+
+                        <div className="mb-6">
+                            <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">{t('clue.location')}</div>
+                            <div className="font-medium">{clue.location}</div>
+                        </div>
+
+                        <div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">{t('clue.keywords')}</div>
+                            <div className="flex flex-wrap gap-2 mt-1">
+                                {clue.keywords.map((keyword, index) => (
+                                    <span key={index} className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100 px-2 py-1 rounded-md text-sm">
+                                        {keyword}
+                                    </span>
+                                ))}
                             </div>
                         </div>
                     </div>
 
-                    <div className="space-y-6">
-                        {/* Clue details */}
-                        <div className="card-dark p-6">
-                            <h2 className="text-xl font-semibold mb-4 text-high-contrast">{t('clue.details')}</h2>
+                    {/* Analysis Section */}
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                        <h2 className="text-xl font-bold mb-4">{t('clue.analysis')}</h2>
 
-                            <div className="mb-4">
-                                <h3 className="text-sm text-medium-contrast mb-1">
-                                    {t('clue.type')}
-                                </h3>
-                                <p className="font-medium text-high-contrast">{t(`clue.type.${clue.type}`)}</p>
-                            </div>
-
-                            <div className="mb-4">
-                                <h3 className="text-sm text-medium-contrast mb-1">
-                                    {t('clue.location')}
-                                </h3>
-                                <p className="font-medium text-high-contrast">{clue.location}</p>
-                            </div>
-
-                            <div className="mb-4">
-                                <h3 className="text-sm text-medium-contrast mb-1">
-                                    {t('clue.discovered_on')}
-                                </h3>
-                                <p className="font-medium text-high-contrast">
-                                    {new Date().toLocaleDateString()}
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* Related suspects */}
-                        {relatedSuspects.length > 0 && (
-                            <div className="card-dark p-6">
-                                <h2 className="text-xl font-semibold mb-4 text-high-contrast">{t('clue.related_suspects')}</h2>
-
-                                <div className="space-y-4">
-                                    {relatedSuspects.map(suspect => (
-                                        <div
-                                            key={suspect.id}
-                                            className="flex items-center p-3 bg-surface-800 rounded-lg hover:bg-surface-700 transition-colors cursor-pointer"
-                                            onClick={() => router.push(`/suspects/${suspect.id}`)}
-                                        >
-                                            {suspect.imageUrl && (
-                                                <div className="relative w-10 h-10 rounded-full overflow-hidden mr-3">
-                                                    <Image
-                                                        src={suspect.imageUrl}
-                                                        alt={suspect.name}
-                                                        fill
-                                                        className="object-cover"
-                                                    />
-                                                </div>
-                                            )}
-                                            <div>
-                                                <h3 className="font-medium text-high-contrast">{suspect.name}</h3>
-                                                <p className="text-sm text-medium-contrast">{t('suspect.connection')}</p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
+                        {error && (
+                            <div className="bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 p-4 rounded-md mb-4">
+                                {error}
                             </div>
                         )}
 
-                        {/* Actions */}
-                        <div className="card-dark p-6">
-                            <h2 className="text-xl font-semibold mb-4 text-high-contrast">{t('nav.quickactions')}</h2>
-
+                        {!analysisResult ? (
+                            <Button
+                                onClick={handleAnalyzeClue}
+                                isLoading={isAnalyzing}
+                                className="w-full"
+                            >
+                                {t('clue.analyze')}
+                            </Button>
+                        ) : (
                             <div className="space-y-4">
-                                {relatedCase && (
-                                    <Button
-                                        variant="outline"
-                                        fullWidth
-                                        className="justify-start"
-                                        onClick={() => router.push(`/cases/${relatedCase.id}`)}
-                                    >
-                                        <FaArrowLeft className="mr-2" /> {t('nav.back_to_case')}
-                                    </Button>
-                                )}
+                                <div>
+                                    <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">{t('clue.significance')}</div>
+                                    <div className="bg-indigo-50 dark:bg-indigo-900/30 p-4 rounded-md text-indigo-700 dark:text-indigo-200">
+                                        {analysisResult.significance}
+                                    </div>
+                                </div>
 
-                                <Button
-                                    variant="outline"
-                                    fullWidth
-                                    className="justify-start"
-                                    onClick={() => copyToClipboard(`${t('clue.title')}: ${clue.title}\n${t('clue.description')}: ${clue.description}`)}
-                                >
-                                    <FaLink className="mr-2" /> {t('clue.copy_details')}
-                                </Button>
+                                <div>
+                                    <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">{t('clue.possibleConnections')}</div>
+                                    <div className="bg-indigo-50 dark:bg-indigo-900/30 p-4 rounded-md text-indigo-700 dark:text-indigo-200">
+                                        {analysisResult.possibleConnections}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">{t('clue.questions')}</div>
+                                    <ul className="bg-indigo-50 dark:bg-indigo-900/30 p-4 rounded-md text-indigo-700 dark:text-indigo-200 list-disc pl-5">
+                                        {analysisResult.questionsToConsider.map((question, index) => (
+                                            <li key={index} className="mb-1">{question}</li>
+                                        ))}
+                                    </ul>
+                                </div>
                             </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Sidebar */}
+                <div className="space-y-6">
+                    {/* Case info */}
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                        <h2 className="text-xl font-bold mb-4">{t('clue.relatedCase')}</h2>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <div className="flex items-center">
+                                <FiFileText size={20} className="text-gray-400 mr-3" />
+                                <span>{caseData.title}</span>
+                            </div>
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => router.push(`/cases/${caseData.id}`)}
+                            >
+                                {t('case.view')}
+                            </Button>
                         </div>
                     </div>
+
+                    {/* Related Suspects */}
+                    {relatedSuspects.length > 0 && (
+                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                            <h2 className="text-xl font-bold mb-4">{t('clue.relatedSuspects')}</h2>
+                            <div className="space-y-3">
+                                {relatedSuspects.map(suspect => (
+                                    <div key={suspect?.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                        <div className="flex items-center">
+                                            <FiUser size={20} className="text-gray-400 mr-3" />
+                                            <span>{suspect?.name}</span>
+                                        </div>
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => suspect?.id && handleViewSuspect(suspect.id)}
+                                        >
+                                            {t('suspect.view')}
+                                        </Button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </Layout>

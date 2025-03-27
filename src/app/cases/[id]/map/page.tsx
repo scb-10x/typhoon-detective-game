@@ -1,15 +1,15 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { FaArrowLeft } from 'react-icons/fa6';
-import { FaSearch, FaMagnifyingGlass } from 'react-icons/fa';
+import Image from 'next/image';
 import Layout from '@/components/Layout';
 import Button from '@/components/Button';
-import Card from '@/components/Card';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useGame } from '@/contexts/GameContext';
-import Image from 'next/image';
+import { FiArrowLeft, FiCheck } from 'react-icons/fi';
+import { FaSearch } from 'react-icons/fa';
 
 interface ScenePageProps {
     params: {
@@ -17,67 +17,38 @@ interface ScenePageProps {
     };
 }
 
-// Fix the linter error by declaring a proper interface for translation function
-interface TranslateFunction {
-    (key: string): string;
-    (key: string, params: Record<string, string>): string;
-}
-
 export default function ScenePage({ params }: ScenePageProps) {
     const router = useRouter();
     const { t } = useLanguage();
     const { state, dispatch } = useGame();
-    const { cases, clues, gameState } = state;
+    const { cases: allCases, clues: allClues } = state;
 
-    // Get case data
-    const caseData = cases.find(c => c.id === params.id);
+    const [activeHotspot, setActiveHotspot] = useState<string | null>(null);
+    const [discoveredClue, setDiscoveredClue] = useState<string | null>(null);
 
-    // Get undiscovered clues for this case
-    const undiscoveredClues = clues.filter(
-        clue => clue.caseId === params.id && !gameState.discoveredClues.includes(clue.id)
+    // Find the case by ID
+    const caseData = allCases.find((c: any) => c.id === params.id);
+
+    // Get clues for this case that can be discovered
+    const caseClues = allClues.filter((c: any) =>
+        c.caseId === params.id &&
+        !state.gameState.discoveredClues.includes(c.id)
     );
 
-    // Set the case as active when the page loads
+    // Select a random undiscovered clue for the player to find
     useEffect(() => {
-        if (caseData && gameState.activeCase !== params.id) {
-            dispatch({ type: 'SET_ACTIVE_CASE', payload: params.id });
+        if (caseClues.length > 0 && !discoveredClue) {
+            const randomIndex = Math.floor(Math.random() * caseClues.length);
+            setDiscoveredClue(caseClues[randomIndex].id);
         }
-    }, [caseData, dispatch, gameState.activeCase, params.id]);
-
-    const [hoveredArea, setHoveredArea] = useState<string | null>(null);
-    const [activeTool, setActiveTool] = useState<'magnify' | 'inspect' | null>(null);
-
-    // Search locations where clues can be found
-    const searchLocations = [
-        { id: 'desk', name: t('scene.locations.desk'), x: 20, y: 30, width: 15, height: 10 },
-        { id: 'window', name: t('scene.locations.window'), x: 70, y: 25, width: 15, height: 25 },
-        { id: 'bookshelf', name: t('scene.locations.bookshelf'), x: 40, y: 15, width: 20, height: 30 },
-        { id: 'floor', name: t('scene.locations.floor'), x: 30, y: 70, width: 40, height: 20 },
-        { id: 'cabinet', name: t('scene.locations.cabinet'), x: 75, y: 60, width: 15, height: 15 },
-    ];
-
-    // Find a clue
-    const handleFindClue = (locationId: string) => {
-        // Check if there's an undiscovered clue at this location
-        const clueAtLocation = undiscoveredClues.find(
-            clue => clue.location.toLowerCase() === locationId.toLowerCase()
-        );
-
-        if (clueAtLocation) {
-            dispatch({ type: 'DISCOVER_CLUE', payload: clueAtLocation.id });
-            // Use proper type-safe translation
-            alert(`${t('scene.found_clue')}: ${clueAtLocation.title}`);
-        } else {
-            alert(t('scene.nothing_found'));
-        }
-    };
+    }, [caseClues, discoveredClue]);
 
     if (!caseData) {
         return (
             <Layout>
                 <div className="text-center py-12">
-                    <h1 className="text-2xl font-bold mb-4 text-high-contrast">{t('case.not_found')}</h1>
-                    <p className="mb-6 text-medium-contrast">{t('case.does_not_exist')}</p>
+                    <h1 className="text-2xl font-bold mb-4">{t('case.not_found')}</h1>
+                    <p className="mb-6">{t('case.does_not_exist')}</p>
                     <Button
                         variant="primary"
                         onClick={() => router.push('/cases')}
@@ -89,138 +60,121 @@ export default function ScenePage({ params }: ScenePageProps) {
         );
     }
 
+    // Hotspots in the crime scene
+    const hotspots = [
+        { id: 'desk', name: t('scene.desk'), x: 25, y: 30 },
+        { id: 'window', name: t('scene.window'), x: 75, y: 20 },
+        { id: 'floor', name: t('scene.floor'), x: 50, y: 70 },
+        { id: 'bookshelf', name: t('scene.bookshelf'), x: 85, y: 50 },
+        { id: 'table', name: t('scene.table'), x: 35, y: 55 }
+    ];
+
+    // Handle discovering a clue
+    const handleDiscoverClue = (clueId: string) => {
+        dispatch({
+            type: 'DISCOVER_CLUE',
+            payload: clueId
+        });
+
+        // After discovery, redirect to clue examination
+        router.push(`/clues/${clueId}`);
+    };
+
     return (
         <Layout>
-            <div className="mb-8">
-                {/* Scene header */}
-                <div className="flex items-center mb-6">
-                    <button
-                        onClick={() => router.push(`/cases/${params.id}`)}
-                        className="mr-4 p-2 rounded-full hover:bg-surface-700"
-                        aria-label={t('nav.back_to_case')}
-                    >
-                        <FaArrowLeft />
-                    </button>
-                    <div>
-                        <h1 className="text-2xl font-bold text-high-contrast">{t('scene.investigate')}</h1>
-                        <p className="text-medium-contrast">{caseData.title}</p>
+            <div className="mb-6">
+                <Button
+                    onClick={() => router.push(`/cases/${params.id}`)}
+                    variant="outline"
+                    className="flex items-center gap-2"
+                >
+                    <FiArrowLeft size={16} />
+                    {t('nav.back')}
+                </Button>
+            </div>
+
+            <div className="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 mb-6">
+                <h1 className="text-2xl font-bold mb-2">{t('scene.investigate')} {caseData.title}</h1>
+                <p className="text-surface-600 dark:text-surface-300 mb-4">
+                    {t('scene.instructions')}
+                </p>
+            </div>
+
+            <div className="bg-white dark:bg-surface-800 rounded-lg shadow-md p-6 mb-6">
+                <div className="relative w-full h-[400px] md:h-[500px] bg-surface-200 dark:bg-surface-700 rounded-lg overflow-hidden">
+                    {/* Scene background - using a gradient as placeholder */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary-100/40 to-accent-100/40 dark:from-primary-900/40 dark:to-accent-900/40">
+                        {caseData.imageUrl && (
+                            <Image
+                                src={caseData.imageUrl}
+                                alt={caseData.title}
+                                fill
+                                className="object-cover opacity-70"
+                            />
+                        )}
                     </div>
+
+                    {/* Hotspots */}
+                    {hotspots.map(hotspot => (
+                        <button
+                            key={hotspot.id}
+                            className={`absolute w-10 h-10 rounded-full flex items-center justify-center transform -translate-x-1/2 -translate-y-1/2 transition-all 
+                                ${activeHotspot === hotspot.id ?
+                                    'bg-accent-500 text-white scale-125 shadow-lg' :
+                                    'bg-white dark:bg-surface-800 text-surface-600 dark:text-surface-300 shadow hover:scale-110'}`}
+                            style={{ left: `${hotspot.x}%`, top: `${hotspot.y}%` }}
+                            onClick={() => setActiveHotspot(hotspot.id)}
+                        >
+                            <FaSearch className={activeHotspot === hotspot.id ? 'text-white' : 'text-accent-500'} />
+                        </button>
+                    ))}
                 </div>
 
-                {/* Scene tools */}
-                <div className="flex mb-6 space-x-4">
-                    <Button
-                        variant={activeTool === 'magnify' ? 'primary' : 'outline'}
-                        onClick={() => setActiveTool('magnify')}
-                    >
-                        <FaMagnifyingGlass className="mr-2" />
-                        {t('scene.tools.magnify')}
-                    </Button>
-                    <Button
-                        variant={activeTool === 'inspect' ? 'primary' : 'outline'}
-                        onClick={() => setActiveTool('inspect')}
-                    >
-                        <FaSearch className="mr-2" />
-                        {t('scene.tools.inspect')}
-                    </Button>
-                </div>
+                {/* Hotspot details */}
+                {activeHotspot && (
+                    <div className="mt-6 p-4 bg-surface-100 dark:bg-surface-700 rounded-lg">
+                        <h3 className="text-lg font-semibold mb-2">{hotspots.find(h => h.id === activeHotspot)?.name}</h3>
 
-                {/* Scene view - replace with your actual scene graphic */}
-                <div className="card-dark relative mb-6 rounded-lg overflow-hidden">
-                    <div className="bg-surface-800 min-h-[400px] md:min-h-[600px] relative">
-                        {caseData.imageUrl ? (
-                            <div className="relative w-full h-full">
-                                <Image
-                                    src={caseData.imageUrl}
-                                    alt={t('scene.crime_scene')}
-                                    fill
-                                    className="object-cover"
-                                />
+                        {/* If this hotspot has the clue to discover */}
+                        {discoveredClue &&
+                            ((activeHotspot === 'desk' && ['clue-001-3', 'clue-003-2'].includes(discoveredClue)) ||
+                                (activeHotspot === 'floor' && ['clue-001-2', 'clue-002-1'].includes(discoveredClue)) ||
+                                (activeHotspot === 'window' && ['clue-002-2'].includes(discoveredClue)) ||
+                                (activeHotspot === 'bookshelf' && ['clue-003-1'].includes(discoveredClue)) ||
+                                (activeHotspot === 'table' && ['clue-001-1', 'clue-003-3'].includes(discoveredClue))) ? (
+                            <div className="bg-green-100 dark:bg-green-900 p-4 rounded-md text-green-800 dark:text-green-200">
+                                <div className="flex items-center mb-2">
+                                    <FiCheck className="text-green-600 dark:text-green-400 mr-2" />
+                                    <span className="font-semibold">{t('scene.found_clue')}</span>
+                                </div>
+                                <p className="mb-4">{t('scene.clue_description')}</p>
+                                <Button
+                                    variant="accent"
+                                    onClick={() => handleDiscoverClue(discoveredClue)}
+                                    className="flex items-center gap-2"
+                                >
+                                    <FiCheck size={16} />
+                                    {t('game.collect_clue')}
+                                </Button>
                             </div>
                         ) : (
-                            <div className="flex items-center justify-center h-full">
-                                <p className="text-medium-contrast">{t('scene.image_not_available')}</p>
+                            <div>
+                                <p className="text-surface-600 dark:text-surface-300 mb-4">
+                                    {t('scene.nothing_found')}
+                                </p>
+                                <div className="flex justify-end">
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => setActiveHotspot(null)}
+                                    >
+                                        {t('scene.continue_search')}
+                                    </Button>
+                                </div>
                             </div>
                         )}
-
-                        {/* Interactive areas - would be positioned over the image */}
-                        {searchLocations.map((location) => (
-                            <div
-                                key={location.id}
-                                className={`absolute cursor-pointer transition-all duration-300 ${hoveredArea === location.id
-                                    ? 'bg-primary-500/30 border border-primary-400'
-                                    : activeTool ? 'bg-primary-500/10 hover:bg-primary-500/20 border border-primary-500/20' : 'hidden'
-                                    }`}
-                                style={{
-                                    left: `${location.x}%`,
-                                    top: `${location.y}%`,
-                                    width: `${location.width}%`,
-                                    height: `${location.height}%`,
-                                }}
-                                onMouseEnter={() => setHoveredArea(location.id)}
-                                onMouseLeave={() => setHoveredArea(null)}
-                                onClick={() => activeTool && handleFindClue(location.id)}
-                            >
-                                {hoveredArea === location.id && (
-                                    <div className="absolute bottom-2 left-2 bg-surface-900 px-2 py-1 rounded text-sm">
-                                        {location.name}
-                                    </div>
-                                )}
-                            </div>
-                        ))}
                     </div>
-                </div>
-
-                {/* Instructions */}
-                <div className="card-dark p-6 mb-6">
-                    <h2 className="text-xl font-semibold mb-4 text-high-contrast">{t('scene.instructions')}</h2>
-                    <p className="text-medium-contrast mb-4">
-                        {t('scene.instructions_text')}
-                    </p>
-                    <ul className="list-disc pl-5 space-y-2 text-medium-contrast">
-                        <li>{t('scene.instruction_1')}</li>
-                        <li>{t('scene.instruction_2')}</li>
-                        <li>{t('scene.instruction_3')}</li>
-                    </ul>
-                </div>
-
-                {/* Found clues */}
-                <div className="card-dark p-6">
-                    <h2 className="text-xl font-semibold mb-4 text-high-contrast">{t('scene.found_clues')}</h2>
-
-                    {gameState.discoveredClues.filter(id =>
-                        clues.find(c => c.id === id)?.caseId === params.id
-                    ).length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {clues
-                                .filter(clue =>
-                                    clue.caseId === params.id &&
-                                    gameState.discoveredClues.includes(clue.id)
-                                )
-                                .map(clue => (
-                                    <Card
-                                        key={clue.id}
-                                        title={clue.title}
-                                        description={clue.description.length > 100
-                                            ? clue.description.slice(0, 100) + '...'
-                                            : clue.description}
-                                        image={clue.imageUrl}
-                                        highlighted={gameState.examinedClues.includes(clue.id)}
-                                        discovered={true}
-                                        onClick={() => {
-                                            if (!gameState.examinedClues.includes(clue.id)) {
-                                                dispatch({ type: 'EXAMINE_CLUE', payload: clue.id });
-                                            }
-                                            router.push(`/clues/${clue.id}`);
-                                        }}
-                                    />
-                                ))}
-                        </div>
-                    ) : (
-                        <p className="text-medium-contrast">{t('scene.no_clues_found')}</p>
-                    )}
-                </div>
+                )}
             </div>
         </Layout>
     );
-}
+} 

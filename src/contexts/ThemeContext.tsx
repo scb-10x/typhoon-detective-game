@@ -1,69 +1,88 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, ReactNode, useEffect, useState } from 'react';
 
-// Define the possible theme types
-type Theme = 'dark';
+type Theme = 'light' | 'dark' | 'system';
 
-// Define the shape of the theme context
 interface ThemeContextType {
     theme: Theme;
     setTheme: (theme: Theme) => void;
+    currentTheme: 'light' | 'dark'; // The actual applied theme after system preference
 }
 
-// Create the theme context with a default value
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-// Provider component that wraps app
-export const ThemeProvider = ({
-    children,
-}: {
-    children: React.ReactNode;
-}) => {
-    // Always set to dark mode
-    const [theme, setTheme] = useState<Theme>('dark');
+export function ThemeProvider({ children }: { children: ReactNode }) {
+    // Initialize theme from localStorage or default to system
+    const [theme, setThemeState] = useState<Theme>('system');
+    const [currentTheme, setCurrentTheme] = useState<'light' | 'dark'>('light');
 
-    // Effect to apply theme class to document on mount
-    useEffect(() => {
-        const root = window.document.documentElement;
-
-        // Remove all theme classes and add dark class
-        root.classList.remove('light');
-        root.classList.add('dark');
-
-        // Set a data attribute for specific CSS targeting
-        root.setAttribute('data-theme', 'dark');
-
-        // Force dark color scheme for best readability
-        const meta = document.querySelector('meta[name="color-scheme"]');
-        if (meta) {
-            meta.setAttribute('content', 'dark');
-        } else {
-            const newMeta = document.createElement('meta');
-            newMeta.name = 'color-scheme';
-            newMeta.content = 'dark';
-            document.head.appendChild(newMeta);
-        }
-
-    }, []);
-
-    const value = {
-        theme,
-        setTheme: () => { }, // Empty function as we're enforcing dark mode only
+    // Set the theme in both state and localStorage
+    const setTheme = (newTheme: Theme) => {
+        setThemeState(newTheme);
+        localStorage.setItem('theme', newTheme);
     };
 
+    // On mount, load saved theme from localStorage
+    useEffect(() => {
+        const savedTheme = localStorage.getItem('theme') as Theme;
+        if (savedTheme && ['light', 'dark', 'system'].includes(savedTheme)) {
+            setThemeState(savedTheme);
+        }
+    }, []);
+
+    // Update the document with the current theme
+    useEffect(() => {
+        // Determine if we should use dark mode
+        let isDark = false;
+
+        if (theme === 'dark') {
+            isDark = true;
+        } else if (theme === 'system') {
+            isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        }
+
+        // Update the document and state with the current theme
+        if (isDark) {
+            document.documentElement.classList.add('dark');
+            setCurrentTheme('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+            setCurrentTheme('light');
+        }
+    }, [theme]);
+
+    // Listen for system theme changes
+    useEffect(() => {
+        if (theme !== 'system') return;
+
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+        const handleChange = () => {
+            if (mediaQuery.matches) {
+                document.documentElement.classList.add('dark');
+                setCurrentTheme('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                setCurrentTheme('light');
+            }
+        };
+
+        mediaQuery.addEventListener('change', handleChange);
+        return () => mediaQuery.removeEventListener('change', handleChange);
+    }, [theme]);
+
     return (
-        <ThemeContext.Provider value={value}>
+        <ThemeContext.Provider value={{ theme, setTheme, currentTheme }}>
             {children}
         </ThemeContext.Provider>
     );
-};
+}
 
-// Custom hook to use the theme context
-export const useTheme = () => {
+export function useTheme() {
     const context = useContext(ThemeContext);
     if (context === undefined) {
         throw new Error('useTheme must be used within a ThemeProvider');
     }
     return context;
-}; 
+} 
