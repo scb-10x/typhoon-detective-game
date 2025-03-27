@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
+  <rect width="1200" height="630" fill="#111827"/>
+  
+  <!-- Detective icon -->
+  <g transform="translate(360, 150) scale(1.2)">
+    <circle cx="200" cy="160" r="140" fill="#2563EB"/>
+    <path d="M200 50C143.8 50 98 95.8 98 152C98 208.2 143.8 254 200 254C256.2 254 302 208.2 302 152C302 95.8 256.2 50 200 50ZM200 80C239.8 80 272 112.2 272 152C272 191.8 239.8 224 200 224C160.2 224 128 191.8 128 152C128 112.2 160.2 80 200 80Z" fill="white"/>
+    <path d="M260 100L236 124L226 114L250 90L260 100Z" fill="white"/>
+    <path d="M236 124L226 114L170 170V200H200L256 144L246 134L200 180H190V170L236 124Z" fill="white"/>
+    <circle cx="140" cy="152" r="12" fill="white"/>
+  </g>
+  
+  <!-- Game title -->
+  <text x="600" y="390" font-family="Arial, sans-serif" font-size="60" font-weight="bold" fill="white" text-anchor="middle">Detective Game</text>
+  <text x="600" y="450" font-family="Arial, sans-serif" font-size="30" fill="#9CA3AF" text-anchor="middle">Solve the case!</text>
+  
+  <!-- Decorative elements -->
+  <path d="M80 530L120 490M120 490L160 530M120 490V420" stroke="#4B5563" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M1120 530L1080 490M1080 490L1040 530M1080 490V420" stroke="#4B5563" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Magnifying glass decorative element -->
+  <circle cx="980" cy="110" r="40" stroke="#4B5563" stroke-width="10" fill="none"/>
+  <line x1="935" y1="155" x2="895" y2="195" stroke="#4B5563" stroke-width="10" stroke-linecap="round"/>
+</svg> 
