@@ -10,7 +10,7 @@ export async function GET(_request: NextRequest) {
             debugMode: process.env.NODE_ENV === 'development'
         },
         models: {
-            default: 'typhoon-v2-70b-instruct',
+            default: 'typhoon-v2.1-12b-instruct',
             advanced: 'typhoon-v2-r1-70b-preview'
         },
         maxGenerationLength: 1000

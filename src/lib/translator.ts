@@ -36,7 +36,7 @@ ${text}`;
     try {
         const response = await fetchTyphoonCompletion(
             messages,
-            'typhoon-v2-70b-instruct',
+            'typhoon-v2.1-12b-instruct',
             0.7,
             2048
         );
@@ -127,7 +127,7 @@ ${combinedText}`;
         // Use the standard model for translation
         const response = await fetchTyphoonCompletion(
             messages,
-            'typhoon-v2-70b-instruct',
+            'typhoon-v2.1-12b-instruct',
             0.7,
             2048
         );

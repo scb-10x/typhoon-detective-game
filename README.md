@@ -16,7 +16,7 @@ An interactive detective game built with Next.js, React, and Typhoon AI integrat
 
 - **Framework**: Next.js 15
 - **UI**: React 19, Tailwind CSS 4
-- **AI Integration**: Typhoon API (models: typhoon-v2-70b-instruct and typhoon-v2-r1-70b-preview)
+- **AI Integration**: Typhoon API (models: typhoon-v2.1-12b-instruct and typhoon-v2-r1-70b-preview)
 - **Package Manager**: pnpm
 - **Styling**: Tailwind CSS
 - **Icons**: React Icons

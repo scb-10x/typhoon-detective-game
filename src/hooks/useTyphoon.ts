@@ -13,7 +13,7 @@ export function useTyphoon(options: UseTyphoonOptions = {}) {
 
     const sendMessage = async (
         messages: TyphoonMessage[],
-        model: TyphoonModel = 'typhoon-v2-70b-instruct',
+        model: TyphoonModel = 'typhoon-v2.1-12b-instruct',
         temperature: number = 0.7,
         max_tokens: number = 800
     ) => {

@@ -107,7 +107,7 @@ Respond in a structured JSON format that can be parsed by JavaScript.`;
     // Use the standard model for suspect analysis
     const response = await fetchTyphoonCompletion(
         messages,
-        'typhoon-v2-70b-instruct',
+        'typhoon-v2.1-12b-instruct',
         0.7,
         2048
     );
@@ -194,10 +194,9 @@ Additional information:
     // Add the current question
     messages.push({ role: 'user', content: question });
 
-    // Use the more advanced model for more nuanced responses
     const response = await fetchTyphoonCompletion(
         messages,
-        'typhoon-v2-r1-70b-preview',
+        'typhoon-v2.1-12b-instruct',
         0.7,
         2048
     );

@@ -130,7 +130,7 @@ Respond in the JSON format specified in the system instructions.`;
         // Use the standard model for clue analysis
         const response = await fetchTyphoonCompletion(
             messages,
-            'typhoon-v2-70b-instruct',
+            'typhoon-v2.1-12b-instruct',
             0.7,
             2048
         );

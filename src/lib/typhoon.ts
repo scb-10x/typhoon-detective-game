@@ -1,4 +1,4 @@
-export type TyphoonModel = 'typhoon-v2-70b-instruct' | 'typhoon-v2-r1-70b-preview';
+export type TyphoonModel = 'typhoon-v2.1-12b-instruct' | 'typhoon-v2-r1-70b-preview';
 
 export interface TyphoonMessage {
     role: 'system' | 'user' | 'assistant';
@@ -27,7 +27,7 @@ export interface TyphoonResponse {
 
 export async function fetchTyphoonCompletion(
     messages: TyphoonMessage[],
-    model: TyphoonModel = 'typhoon-v2-70b-instruct',
+    model: TyphoonModel = 'typhoon-v2.1-12b-instruct',
     temperature: number = 0.7,
     max_tokens: number = 800
 ): Promise<string> {

@@ -6,7 +6,7 @@ const TYPHOON_API_ENDPOINT = process.env.TYPHOON_API_ENDPOINT || 'https://api.op
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { messages, model = 'typhoon-v2-70b-instruct', temperature = 0.7, max_tokens = 800 } = body;
+        const { messages, model = 'typhoon-v2.1-12b-instruct', temperature = 0.7, max_tokens = 800 } = body;
 
         if (!messages || !Array.isArray(messages)) {
             console.error('API route error: Invalid messages format', messages);
@@ -17,10 +17,10 @@ export async function POST(request: NextRequest) {
         }
 
         // Validate the model type
-        if (model !== 'typhoon-v2-70b-instruct' && model !== 'typhoon-v2-r1-70b-preview') {
+        if (model !== 'typhoon-v2.1-12b-instruct' && model !== 'typhoon-v2-r1-70b-preview') {
             console.error('API route error: Invalid model', model);
             return NextResponse.json(
-                { error: 'Invalid model. Must be either typhoon-v2-70b-instruct or typhoon-v2-r1-70b-preview.' },
+                { error: 'Invalid model. Must be either typhoon-v2.1-12b-instruct or typhoon-v2-r1-70b-preview.' },
                 { status: 400 }
             );
         }
