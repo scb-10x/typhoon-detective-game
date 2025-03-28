@@ -187,7 +187,7 @@ export default function CluePage({ params }: CluePageProps) {
                             <div className="space-y-4">
                                 <div>
                                     <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">{t('clue.significance')}</div>
-                                    <div className="bg-indigo-50 dark:bg-indigo-900/30 p-4 rounded-md text-indigo-700 dark:text-indigo-200">
+                                    <div className="bg-indigo-900/30 p-4 rounded-md text-indigo-200 font-medium">
                                         {analysisResult.summary}
                                     </div>
                                 </div>
@@ -195,7 +195,7 @@ export default function CluePage({ params }: CluePageProps) {
                                 {analysisResult.connections.length > 0 && (
                                     <div>
                                         <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">{t('clue.connections')}</div>
-                                        <div className="bg-indigo-50 dark:bg-indigo-900/30 p-4 rounded-md text-indigo-700 dark:text-indigo-200">
+                                        <div className="bg-indigo-900/30 p-4 rounded-md text-indigo-200">
                                             {analysisResult.connections.map((connection, index) => {
                                                 const suspect = suspects.find(s => s.id === connection.suspectId);
                                                 return (
@@ -203,16 +203,16 @@ export default function CluePage({ params }: CluePageProps) {
                                                         <div className="font-medium mb-1">
                                                             {suspect ? suspect.name : 'Unknown Suspect'} - {connection.connectionType}
                                                         </div>
-                                                        <div>{connection.description}</div>
+                                                        <div className="font-medium">{connection.description}</div>
                                                         {suspect && (
                                                             <Button
-                                                                variant="secondary"
+                                                                variant="ghost"
                                                                 size="sm"
                                                                 className="mt-1 pl-0"
                                                                 onClick={() => handleViewSuspect(suspect.id)}
                                                             >
                                                                 <FiUser className="inline mr-1" size={14} />
-                                                                <span className="comic-text text-white">{t('suspect.view')}</span>
+                                                                <span className="comic-text">{t('suspect.view')}</span>
                                                             </Button>
                                                         )}
                                                     </div>
@@ -224,7 +224,7 @@ export default function CluePage({ params }: CluePageProps) {
 
                                 <div>
                                     <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">{t('clue.next_steps')}</div>
-                                    <ul className="bg-indigo-50 dark:bg-indigo-900/30 p-4 rounded-md text-indigo-700 dark:text-indigo-200 list-disc pl-5">
+                                    <ul className="bg-indigo-900/30 p-4 rounded-md text-indigo-200 list-disc pl-5">
                                         {analysisResult.nextSteps.map((step, index) => (
                                             <li key={index} className="mb-1">{step}</li>
                                         ))}
@@ -240,18 +240,20 @@ export default function CluePage({ params }: CluePageProps) {
                     {/* Case info */}
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                         <h2 className="text-xl font-bold mb-4">{t('clue.relatedCase')}</h2>
-                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                            <div className="flex items-center">
-                                <FiFileText size={20} className="text-gray-400 mr-3" />
-                                <span>{caseData.title}</span>
+                        <div className="bg-indigo-900/30 p-4 rounded-md">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center">
+                                    <FiFileText size={20} className="text-indigo-200 mr-3" />
+                                    <span className="text-indigo-200 font-medium">{caseData.title}</span>
+                                </div>
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => router.push(`/cases/${caseData.id}`)}
+                                >
+                                    <span className="comic-text">{t('case.view')}</span>
+                                </Button>
                             </div>
-                            <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => router.push(`/cases/${caseData.id}`)}
-                            >
-                                <span className="comic-text">{t('case.view')}</span>
-                            </Button>
                         </div>
                     </div>
                 </div>

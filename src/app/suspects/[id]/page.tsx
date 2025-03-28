@@ -34,13 +34,29 @@ export default function SuspectPage({ params }: SuspectPageProps) {
     }[]>([]);
     const [suspectId, setSuspectId] = useState<string>('');
 
-    // Predefined questions based on suspect
-    const [predefinedQuestions, setPredefinedQuestions] = useState<string[]>([
-        'Where were you at the time of the incident?',
-        'Can you tell me about your relationship with the victim?',
-        'Do you have an alibi that can be verified?',
-        'Have you noticed anything unusual lately?'
-    ]);
+    // Define language-specific predefined questions
+    const predefinedQuestionsMap = {
+        'en': [
+            'Where were you at the time of the incident?',
+            'Can you tell me about your relationship with the victim?',
+            'Do you have an alibi that can be verified?',
+            'Have you noticed anything unusual lately?'
+        ],
+        'th': [
+            'คุณอยู่ที่ไหนในช่วงเวลาที่เกิดเหตุ?',
+            'คุณช่วยเล่าเกี่ยวกับความสัมพันธ์ของคุณกับผู้เสียหายได้ไหม?',
+            'คุณมีพยานยืนยันตัวตนที่สามารถตรวจสอบได้หรือไม่?',
+            'คุณสังเกตเห็นสิ่งผิดปกติอะไรบ้างในช่วงที่ผ่านมา?'
+        ]
+    };
+
+    // Predefined questions based on language
+    const [predefinedQuestions, setPredefinedQuestions] = useState<string[]>([]);
+
+    // Update predefined questions when language changes
+    useEffect(() => {
+        setPredefinedQuestions(predefinedQuestionsMap[language]);
+    }, [language]);
 
     // Update params.id to use state with async/await approach
     useEffect(() => {
@@ -259,7 +275,9 @@ Answer as the suspect would, using natural language and appropriate demeanor. Ma
                                     <div className="text-center py-6 bg-gray-100 dark:bg-gray-700 rounded-lg">
                                         <FaComment size={32} className="mx-auto mb-2 text-gray-400 dark:text-gray-500" />
                                         <p className="text-gray-600 dark:text-gray-400">
-                                            Start asking questions to interview the suspect.
+                                            {language === 'en' 
+                                                ? 'Start asking questions to interview the suspect.' 
+                                                : 'เริ่มถามคำถามเพื่อสัมภาษณ์ผู้ต้องสงสัย'}
                                         </p>
                                     </div>
                                 ) : (
@@ -267,7 +285,7 @@ Answer as the suspect would, using natural language and appropriate demeanor. Ma
                                         <div key={index} className="bg-gray-100 dark:bg-gray-700 rounded-lg p-4">
                                             <div className="mb-3">
                                                 <div className="font-medium text-accent mb-1 flex items-center">
-                                                    <FaQuestionCircle className="mr-2" /> You
+                                                    <FaQuestionCircle className="mr-2" /> {language === 'en' ? 'You' : 'คุณ'}
                                                 </div>
                                                 <p className="text-sm">{item.question}</p>
                                             </div>
@@ -278,7 +296,8 @@ Answer as the suspect would, using natural language and appropriate demeanor. Ma
                                                 <p className="text-sm whitespace-pre-wrap">
                                                     {item.answer === '...' ? (
                                                         <span className="flex items-center text-gray-500">
-                                                            <FaEllipsisH className="animate-pulse mr-2" /> Thinking...
+                                                            <FaEllipsisH className="animate-pulse mr-2" /> 
+                                                            {language === 'en' ? 'Thinking...' : 'กำลังคิด...'}
                                                         </span>
                                                     ) : (
                                                         item.answer
@@ -293,7 +312,7 @@ Answer as the suspect would, using natural language and appropriate demeanor. Ma
                             {/* Ask a custom question */}
                             <form onSubmit={handleSubmitCustomQuestion} className="mb-6">
                                 <label htmlFor="custom-question" className="block text-sm font-medium mb-2">
-                                    Ask a custom question
+                                    {language === 'en' ? 'Ask a custom question' : 'ถามคำถามอื่นๆ'}
                                 </label>
                                 <div className="flex gap-2">
                                     <input
@@ -301,7 +320,7 @@ Answer as the suspect would, using natural language and appropriate demeanor. Ma
                                         type="text"
                                         value={customQuestion}
                                         onChange={(e) => setCustomQuestion(e.target.value)}
-                                        placeholder="Type your question..."
+                                        placeholder={language === 'en' ? "Type your question..." : "พิมพ์คำถามของคุณ..."}
                                         className="flex-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-transparent"
                                         disabled={isAsking}
                                     />
@@ -311,7 +330,7 @@ Answer as the suspect would, using natural language and appropriate demeanor. Ma
                                         isDisabled={!customQuestion.trim() || isAsking}
                                         isLoading={isAsking}
                                     >
-                                        <span className="comic-text">Ask</span>
+                                        <span className="comic-text">{language === 'en' ? 'Ask' : 'ถาม'}</span>
                                     </Button>
                                 </div>
                             </form>
@@ -319,7 +338,9 @@ Answer as the suspect would, using natural language and appropriate demeanor. Ma
                             {/* Predefined questions */}
                             {predefinedQuestions.length > 0 && (
                                 <div>
-                                    <h3 className="text-sm font-medium mb-2">Suggested Questions</h3>
+                                    <h3 className="text-sm font-medium mb-2">
+                                        {language === 'en' ? 'Suggested Questions' : 'คำถามที่แนะนำ'}
+                                    </h3>
                                     <div className="space-y-2">
                                         {predefinedQuestions.map((question, index) => (
                                             <div

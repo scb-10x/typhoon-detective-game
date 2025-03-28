@@ -6,7 +6,9 @@ import { useGame } from '@/contexts/GameContext';
 import {
     FaHome,
     FaClipboardList,
-    FaCog
+    FaCog,
+    FaQuestionCircle,
+    FaCogs
 } from 'react-icons/fa';
 import ProgressBar from './ProgressBar';
 
@@ -37,6 +39,8 @@ export default function Layout({ children, title }: { children: React.ReactNode,
     const navItems = [
         { href: '/', icon: <FaHome className="text-lg" />, label: t('nav.home') },
         { href: '/cases', icon: <FaClipboardList className="text-lg" />, label: t('nav.cases') },
+        { href: '/how-to-play', icon: <FaQuestionCircle className="text-lg" />, label: t('nav.howToPlay') || 'How to Play' },
+        { href: '/how-it-works', icon: <FaCogs className="text-lg" />, label: t('nav.howItWorks') || 'How It Works' },
         // { href: '/clues', icon: <FaSearch className="text-lg" />, label: t('nav.clues') },
         // { href: '/suspects', icon: <FaUser className="text-lg" />, label: t('nav.suspects') },
         { href: '/settings', icon: <FaCog className="text-lg" />, label: t('nav.settings') }
@@ -50,7 +54,7 @@ export default function Layout({ children, title }: { children: React.ReactNode,
                 <div className="container mx-auto px-4 py-3 flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                         <Link href="/" className="text-3xl font-black comic-text text-yellow-300 transform -rotate-1 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]">
-                            {title || t('app.title')}
+                            {t('app.title')}
                         </Link>
                         <span className="text-xs font-bold borderlands-panel px-2 py-1 bg-surface-800 rotate-2">
                             {t('app.subtitle')}
@@ -126,6 +130,10 @@ export default function Layout({ children, title }: { children: React.ReactNode,
                             )}
                         </Link>
                     ))}
+                </div>
+                <div className="text-center text-surface-400 text-xs mt-1 font-bold">
+                    <span className="transform inline-block -rotate-1">Built with</span>
+                    <a href="https://opentyphoon.ai" target="_blank" rel="noopener noreferrer" className="ml-1 text-[var(--borderlands-yellow)] hover:text-[var(--borderlands-orange)] transition-colors transform inline-block rotate-1">Typhoon</a>
                 </div>
             </nav>
         </div>

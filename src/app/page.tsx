@@ -6,6 +6,7 @@ import Layout from '@/components/Layout';
 import Button from '@/components/Button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useGame } from '@/contexts/GameContext';
+import Link from 'next/link';
 
 export default function Home() {
   const router = useRouter();
@@ -95,6 +96,13 @@ export default function Home() {
                 Warning: This will delete all your progress and start over with sample cases.
               </p>
             )}
+          </div>
+          
+          {/* How to Play link */}
+          <div className="mt-5 text-center">
+            <Link href="/how-to-play" className="text-[var(--borderlands-yellow)] hover:text-[var(--borderlands-orange)] transition-colors font-bold comic-text">
+              {t('nav.howToPlay') || 'How to Play'}
+            </Link>
           </div>
         </div>
       </div>
