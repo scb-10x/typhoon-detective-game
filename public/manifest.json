@@ -1,7 +1,7 @@
 {
-    "name": "Detective Game",
-    "short_name": "DetGame",
-    "description": "An interactive detective game with AI-powered investigations",
+    "name": "Typhoon Detective",
+    "short_name": "TyphoonDet",
+    "description": "An interactive detective game with Typhoon AI-powered interactions",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#ffffff",

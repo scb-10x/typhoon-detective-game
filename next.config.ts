@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ["172.20.1.79"],
+  reactStrictMode: true,
+  images: {
+    domains: ['favicon.ico'],
+  },
 };
 
 export default nextConfig;
