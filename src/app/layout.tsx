@@ -27,8 +27,7 @@ export const metadata: Metadata = {
   title: "Typhoon Detective Game",
   description: "An interactive detective game with Borderlands-inspired UI",
   icons: {
-    icon: '/favicon.svg',
-    apple: '/icons/icon-192.svg',
+    icon: '/favicon.ico',
   }
 };
 
@@ -40,6 +39,7 @@ export default function RootLayout({
   return (
     <html className="dark">
       <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
         <Script id="force-dark-mode" strategy="beforeInteractive">
           {`document.documentElement.classList.add('dark');`}
         </Script>

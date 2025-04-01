@@ -8,12 +8,8 @@ import {
     FaClipboardList,
     FaCog,
     FaQuestionCircle,
-    FaCogs,
-    FaGithub,
-    FaDiscord,
-    FaTwitter
+    FaCogs
 } from 'react-icons/fa';
-import { SiHuggingface } from 'react-icons/si';
 import ProgressBar from './ProgressBar';
 
 export default function Layout({ children, title }: { children: React.ReactNode, title?: string }) {
@@ -111,7 +107,7 @@ export default function Layout({ children, title }: { children: React.ReactNode,
                 </div>
             </main>
 
-            <footer className="sticky bottom-0 borderlands-panel bg-surface-900 py-2 px-4">
+            <nav className="sticky bottom-0 borderlands-panel bg-surface-900 py-2 px-4">
                 <div className="container mx-auto flex justify-between items-center max-w-md">
                     {navItems.map((item) => (
                         <Link
@@ -135,38 +131,11 @@ export default function Layout({ children, title }: { children: React.ReactNode,
                         </Link>
                     ))}
                 </div>
-                <div className="container mx-auto mt-2 pt-2 border-t border-surface-700 flex flex-col items-center space-y-2">
-                    <div className="flex items-center justify-center space-x-4">
-                        <a href="https://github.com/scb-10x" target="_blank" rel="noopener noreferrer"
-                            className="text-surface-400 hover:text-[var(--borderlands-yellow)] transition-colors">
-                            <FaGithub size={20} />
-                        </a>
-                        <a href="https://discord.gg/9F6nrFXyNt" target="_blank" rel="noopener noreferrer"
-                            className="text-surface-400 hover:text-[var(--borderlands-yellow)] transition-colors">
-                            <FaDiscord size={20} />
-                        </a>
-                        <a href="https://huggingface.co/scb10x" target="_blank" rel="noopener noreferrer"
-                            className="text-surface-400 hover:text-[var(--borderlands-yellow)] transition-colors">
-                            <SiHuggingface size={20} />
-                        </a>
-                        <a href="https://x.com/opentyphoon" target="_blank" rel="noopener noreferrer"
-                            className="text-surface-400 hover:text-[var(--borderlands-yellow)] transition-colors">
-                            <FaTwitter size={20} />
-                        </a>
-                    </div>
-                    <div className="flex items-center justify-center space-x-3 text-xs font-bold">
-                        <a href="https://opentyphoon.ai" target="_blank" rel="noopener noreferrer"
-                            className="text-[var(--borderlands-yellow)] hover:text-[var(--borderlands-orange)] transition-colors transform inline-block rotate-1">
-                            #BuiltWithTyphoon
-                        </a>
-                        <span className="text-surface-500">|</span>
-                        <a href="https://opentyphoon.ai/tac" target="_blank" rel="noopener noreferrer"
-                            className="text-surface-400 hover:text-[var(--borderlands-yellow)] transition-colors">
-                            Terms and Conditions
-                        </a>
-                    </div>
+                <div className="text-center text-surface-400 text-xs mt-1 font-bold">
+                    <span className="transform inline-block -rotate-1">Built with</span>
+                    <a href="https://opentyphoon.ai" target="_blank" rel="noopener noreferrer" className="ml-1 text-[var(--borderlands-yellow)] hover:text-[var(--borderlands-orange)] transition-colors transform inline-block rotate-1">Typhoon</a>
                 </div>
-            </footer>
+            </nav>
         </div>
     );
 }
