@@ -49,7 +49,7 @@ export default function Card({
             {/* Card image with polaroid-style */}
             <div className="relative w-full h-48 bg-surface-900 p-3">
                 <div className="absolute inset-0 border-b-[3px] border-black z-10"></div>
-                
+
                 {/* Clue image container with styling */}
                 <div className="relative w-full h-full bg-gray-100 dark:bg-surface-700 border-4 border-white dark:border-surface-500 shadow-md overflow-hidden">
                     {image ? (
@@ -61,10 +61,17 @@ export default function Card({
                             className="object-cover transition-transform hover:scale-105"
                         />
                     ) : (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-surface-800 p-4">
-                            <FaPhotoFilm className="text-4xl text-yellow-500 mb-2" />
-                            <div className="text-xs text-center text-surface-300 font-medium comic-text">
-                                {discovered ? "Evidence Photo" : "Undiscovered Evidence"}
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                            <Image
+                                src="/case-file.png"
+                                alt={discovered ? "Evidence Photo" : "Undiscovered Evidence"}
+                                fill
+                                className="object-cover object-top"
+                            />
+                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-surface-800/80 p-4">
+                                <div className="text-xs text-center text-surface-300 font-medium comic-text">
+                                    {discovered ? "Evidence Photo" : "Undiscovered Evidence"}
+                                </div>
                             </div>
                         </div>
                     )}
@@ -88,24 +95,24 @@ export default function Card({
                     <div className="absolute bottom-1 right-2 text-xs text-white bg-black/50 px-1 font-mono">
                         {discovered ? (new Date().toLocaleDateString()) : "??/??/??"}
                     </div>
-                    
+
                     {/* Clue markings for discovered items */}
                     {discovered && (
                         <div className="absolute top-2 left-2 transform -rotate-12">
                             <div className="bg-yellow-600 text-white text-xs px-1 py-0.5 font-bold comic-text whitespace-nowrap">
-                                EVIDENCE #{title.slice(-2)} 
+                                EVIDENCE #{title.slice(-2)}
                             </div>
                         </div>
                     )}
                 </div>
-                
+
                 {/* Discovery badge - Moved outside of the clue image container to prevent clipping */}
                 {!discovered && (
                     <div className="borderlands-panel absolute top-0 right-0 bg-surface-800 text-white text-xs font-bold px-2 py-1 z-20 rotate-3 comic-text shadow-lg transform translate-x-[4px] translate-y-[-24px]">
                         Undiscovered
                     </div>
                 )}
-                
+
                 {/* Magnifying glass for highlight effect */}
                 {highlighted && (
                     <div className="absolute -bottom-3 -right-3 bg-yellow-500 rounded-full p-2 shadow-lg border-2 border-black z-20">

@@ -8,8 +8,12 @@ import {
     FaClipboardList,
     FaCog,
     FaQuestionCircle,
-    FaCogs
+    FaCogs,
+    FaGithub,
+    FaDiscord,
+    FaTwitter
 } from 'react-icons/fa';
+import { SiHuggingface } from 'react-icons/si';
 import ProgressBar from './ProgressBar';
 
 export default function Layout({ children, title }: { children: React.ReactNode, title?: string }) {
@@ -131,11 +135,74 @@ export default function Layout({ children, title }: { children: React.ReactNode,
                         </Link>
                     ))}
                 </div>
-                <div className="text-center text-surface-400 text-xs mt-1 font-bold">
-                    <span className="transform inline-block -rotate-1">Built with</span>
-                    <a href="https://opentyphoon.ai" target="_blank" rel="noopener noreferrer" className="ml-1 text-[var(--borderlands-yellow)] hover:text-[var(--borderlands-orange)] transition-colors transform inline-block rotate-1">Typhoon</a>
-                </div>
             </nav>
+
+            <footer className="bg-surface-950 border-t border-surface-800 py-6 px-4">
+                <div className="container mx-auto max-w-4xl">
+                    <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+                        <div>
+                            <a
+                                href="https://opentyphoon.ai"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-purple-500 hover:text-purple-400 font-medium transition-colors"
+                            >
+                                #BuiltWithTyphoon
+                            </a>
+                        </div>
+
+                        <div>
+                            <a
+                                href="https://opentyphoon.ai/tac"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-surface-300 hover:text-white transition-colors text-sm"
+                            >
+                                Terms and Conditions
+                            </a>
+                        </div>
+
+                        <div className="flex items-center space-x-4">
+                            <a
+                                href="https://github.com/scb-10x"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-surface-300 hover:text-white transition-colors"
+                                aria-label="GitHub"
+                            >
+                                <FaGithub className="w-5 h-5" />
+                            </a>
+                            <a
+                                href="https://discord.gg/9F6nrFXyNt"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-surface-300 hover:text-white transition-colors"
+                                aria-label="Discord"
+                            >
+                                <FaDiscord className="w-5 h-5" />
+                            </a>
+                            <a
+                                href="https://huggingface.co/scb10x"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-surface-300 hover:text-white transition-colors"
+                                aria-label="Hugging Face"
+                            >
+                                <SiHuggingface className="w-5 h-5" />
+                            </a>
+                            <a
+                                href="https://x.com/opentyphoon"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-surface-300 hover:text-white transition-colors"
+                                aria-label="X (Twitter)"
+                            >
+                                <FaTwitter className="w-5 h-5" />
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </footer>
         </div>
     );
 }

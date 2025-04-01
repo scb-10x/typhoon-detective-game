@@ -6,7 +6,6 @@ import Layout from '@/components/Layout';
 import Button from '@/components/Button';
 import Card from '@/components/Card';
 import Dialog from '@/components/Dialog';
-import { useLanguage } from '@/contexts/LanguageContext';
 import { useGame } from '@/contexts/GameContext';
 import React from 'react';
 
@@ -106,8 +105,8 @@ export default function CasePage({ params }: CasePageProps) {
             ).length;
 
             // Total available clues count (discovered + examined without duplicates)
-            const availableCluesCount = discoveredCluesCount + examinedCluesCount 
-                - caseClues.filter(c => 
+            const availableCluesCount = discoveredCluesCount + examinedCluesCount
+                - caseClues.filter(c =>
                     gameState.discoveredClues.includes(c.id) && gameState.examinedClues.includes(c.id)
                 ).length;
 
