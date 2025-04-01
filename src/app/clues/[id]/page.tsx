@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Layout from '@/components/Layout';
 import Button from '@/components/Button';
+import AIDisclaimer from '@/components/AIDisclaimer';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useGame } from '@/contexts/GameContext';
 import { analyzeClue } from '@/lib/clueAnalyzer';
@@ -47,10 +48,10 @@ export default function CluePage({ params }: CluePageProps) {
 
     // Load saved analysis when component mounts
     useEffect(() => {
-        if (clueId && state.gameState.clueAnalyses[clueId]) {
+        if (clueId && state?.gameState?.clueAnalyses?.[clueId]) {
             setAnalysisResult(state.gameState.clueAnalyses[clueId]);
         }
-    }, [clueId, state.gameState.clueAnalyses]);
+    }, [clueId, state?.gameState?.clueAnalyses]);
 
     // Mark clue as examined when first viewed
     useEffect(() => {
@@ -88,14 +89,14 @@ export default function CluePage({ params }: CluePageProps) {
         try {
             const discoveredClues = clues.filter(c => state.gameState.discoveredClues.includes(c.id));
             const result = await analyzeClue(
-                clue, 
-                suspects, 
-                caseData!, 
-                discoveredClues, 
+                clue,
+                suspects,
+                caseData!,
+                discoveredClues,
                 language
             );
             setAnalysisResult(result);
-            
+
             // Save the analysis to the global state
             dispatch({
                 type: 'SAVE_CLUE_ANALYSIS',
@@ -125,6 +126,8 @@ export default function CluePage({ params }: CluePageProps) {
                     {t('nav.back')}
                 </Button>
             </div>
+
+            <AIDisclaimer className="mb-6" />
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Main clue info */}

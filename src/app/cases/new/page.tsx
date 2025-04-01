@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Layout from '@/components/Layout';
 import Button from '@/components/Button';
+import AIDisclaimer from '@/components/AIDisclaimer';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useGame } from '@/contexts/GameContext';
 import { generateCase } from '@/lib/caseGenerator';
@@ -91,6 +92,8 @@ export default function NewCasePage() {
         <Layout title={t('game.new_case')}>
             <div className="max-w-2xl mx-auto">
                 <h1 className="text-2xl font-bold mb-6">{t('game.new_case')}</h1>
+
+                <AIDisclaimer className="mb-6" />
 
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
                     <h2 className="text-xl font-semibold mb-4">Case Parameters</h2>

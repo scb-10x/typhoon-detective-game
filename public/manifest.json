@@ -1,16 +1,62 @@
 {
-    "name": "Typhoon Detective",
-    "short_name": "TyphoonDet",
-    "description": "An interactive detective game with Typhoon AI-powered interactions",
+    "name": "Typhoon Detective Game",
+    "short_name": "Detective Game",
+    "description": "An interactive detective game powered by Typhoon AI that showcases the capabilities of large language models.",
     "start_url": "/",
     "display": "standalone",
-    "background_color": "#ffffff",
-    "theme_color": "#2563eb",
+    "background_color": "#111827",
+    "theme_color": "#F5A623",
     "icons": [
         {
-            "src": "/favicon.ico",
-            "sizes": "32x32",
-            "type": "image/x-icon"
+            "src": "/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "lang": "en-US",
+    "dir": "ltr",
+    "orientation": "portrait",
+    "categories": [
+        "games",
+        "entertainment"
+    ],
+    "related_applications": [
+        {
+            "platform": "web",
+            "url": "https://opentyphoon.ai"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "New Case",
+            "short_name": "New Case",
+            "description": "Start a new detective case",
+            "url": "/cases/new",
+            "icons": [
+                {
+                    "src": "/icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "My Cases",
+            "short_name": "Cases",
+            "description": "View all detective cases",
+            "url": "/cases",
+            "icons": [
+                {
+                    "src": "/icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
         }
     ]
 }

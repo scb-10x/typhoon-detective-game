@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { FaArrowLeft, FaCheck, FaTimes, FaExclamationTriangle, FaMedal } from 'react-icons/fa';
 import Layout from '@/components/Layout';
 import Button from '@/components/Button';
+import AIDisclaimer from '@/components/AIDisclaimer';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useGame } from '@/contexts/GameContext';
 import { useTyphoon } from '@/hooks/useTyphoon';
@@ -52,7 +53,7 @@ export default function SolveCasePage({ params }: SolveCasePageProps) {
     const discoveredClues = caseClues.filter(c => gameState.discoveredClues.includes(c.id));
     const examinedClues = caseClues.filter(c => gameState.examinedClues.includes(c.id));
     const availableClues = [...examinedClues];
-    
+
     // Add any discovered clues that aren't already examined
     discoveredClues.forEach(clue => {
         if (!examinedClues.some(c => c.id === clue.id)) {
@@ -244,6 +245,8 @@ Please analyze the player's solution and include this JSON format in your respon
                         </button>
                         <h1 className="text-2xl font-bold">Case Conclusion</h1>
                     </div>
+
+                    <AIDisclaimer className="mb-4" />
 
                     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
                         <div className="text-center mb-8">
@@ -467,7 +470,7 @@ Please analyze the player's solution and include this JSON format in your respon
                                     {error}
                                 </div>
                             )}
-                            
+
                             {/* Requirements checklist */}
                             {!isSubmitting && !isAnalyzing && (
                                 <div className="mt-4 text-sm">

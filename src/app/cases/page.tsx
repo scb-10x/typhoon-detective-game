@@ -2,13 +2,14 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { FaPlus, FaSearch } from 'react-icons/fa';
+import { FaPlus, FaSearch, FaRobot } from 'react-icons/fa';
 import Layout from '@/components/Layout';
 import Card from '@/components/Card';
 import Button from '@/components/Button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useGame } from '@/contexts/GameContext';
 import { Case } from '@/types/game';
+import Link from 'next/link';
 
 export default function CasesPage() {
     const router = useRouter();
@@ -47,6 +48,36 @@ export default function CasesPage() {
                     </Button>
                 </div>
 
+                {/* Typhoon AI Info Box */}
+                <div className="mb-6 p-4 bg-surface-800 border border-surface-700 rounded-lg">
+                    <div className="flex items-start">
+                        <FaRobot className="text-[var(--borderlands-yellow)] mt-1 mr-3 flex-shrink-0" size={20} />
+                        <div>
+                            <h2 className="text-lg font-bold text-[var(--borderlands-yellow)] mb-2">
+                                Typhoon AI-Generated Cases
+                            </h2>
+                            <p className="text-sm mb-2">
+                                Each case in this detective game is dynamically generated using Typhoon AI's language models.
+                                Get unique storylines, characters, and mysteries each time you create a new case.
+                            </p>
+                            <div className="flex space-x-4 mt-3">
+                                <Link
+                                    href="/cases/new"
+                                    className="text-sm text-[var(--borderlands-yellow)] hover:text-[var(--borderlands-orange)] font-bold"
+                                >
+                                    Create New Case →
+                                </Link>
+                                <Link
+                                    href="/how-it-works"
+                                    className="text-sm text-[var(--borderlands-yellow)] hover:text-[var(--borderlands-orange)] font-bold"
+                                >
+                                    How It Works →
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 {/* Search bar */}
                 <div className="relative mb-8">
                     <input
@@ -61,38 +92,41 @@ export default function CasesPage() {
 
                 {/* Cases grid */}
                 {filteredCases.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {filteredCases.map(caseItem => (
-                            <Card
-                                key={caseItem.id}
-                                title={caseItem.title}
-                                description={caseItem.summary}
-                                image={caseItem.imageUrl}
-                                onClick={() => handleCaseClick(caseItem)}
-                                highlighted={state.gameState.activeCase === caseItem.id}
-                                footer={
-                                    <div className="flex justify-between items-center">
-                                        <span className={`px-2 py-1 rounded text-xs ${caseItem.solved ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
-                                            'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-                                            }`}>
-                                            {caseItem.solved ? t('case.solved') : t('case.unsolved')}
-                                        </span>
-                                        <span className="text-xs opacity-70">
-                                            {caseItem.difficulty === 'easy' ? t('case.easy') :
-                                                caseItem.difficulty === 'medium' ? t('case.medium') :
-                                                    t('case.hard')}
-                                        </span>
+                    <div>
+                        <h2 className="text-xl font-bold mb-4">Your Cases</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {filteredCases.map(caseItem => (
+                                <Card
+                                    key={caseItem.id}
+                                    title={caseItem.title}
+                                    description={caseItem.summary}
+                                    image={caseItem.imageUrl}
+                                    onClick={() => handleCaseClick(caseItem)}
+                                    highlighted={state.gameState.activeCase === caseItem.id}
+                                    footer={
+                                        <div className="flex justify-between items-center">
+                                            <span className={`px-2 py-1 rounded text-xs ${caseItem.solved ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                                                'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                                                }`}>
+                                                {caseItem.solved ? t('case.solved') : t('case.unsolved')}
+                                            </span>
+                                            <span className="text-xs opacity-70">
+                                                {caseItem.difficulty === 'easy' ? t('case.easy') :
+                                                    caseItem.difficulty === 'medium' ? t('case.medium') :
+                                                        t('case.hard')}
+                                            </span>
+                                        </div>
+                                    }
+                                >
+                                    <div className="text-sm grid grid-cols-2 gap-x-2 gap-y-1">
+                                        <span className="text-gray-500 dark:text-gray-400">{t('case.location')}:</span>
+                                        <span>{caseItem.location}</span>
+                                        <span className="text-gray-500 dark:text-gray-400">{t('case.date')}:</span>
+                                        <span>{new Date(caseItem.dateTime).toLocaleDateString()}</span>
                                     </div>
-                                }
-                            >
-                                <div className="text-sm grid grid-cols-2 gap-x-2 gap-y-1">
-                                    <span className="text-gray-500 dark:text-gray-400">{t('case.location')}:</span>
-                                    <span>{caseItem.location}</span>
-                                    <span className="text-gray-500 dark:text-gray-400">{t('case.date')}:</span>
-                                    <span>{new Date(caseItem.dateTime).toLocaleDateString()}</span>
-                                </div>
-                            </Card>
-                        ))}
+                                </Card>
+                            ))}
+                        </div>
                     </div>
                 ) : (
                     <div className="text-center py-12">

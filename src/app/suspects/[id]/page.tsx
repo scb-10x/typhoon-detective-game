@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { FaArrowLeft, FaChevronRight, FaComment, FaUserTie, FaQuestionCircle, FaEllipsisH } from 'react-icons/fa';
 import Layout from '@/components/Layout';
 import Button from '@/components/Button';
+import AIDisclaimer from '@/components/AIDisclaimer';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useGame } from '@/contexts/GameContext';
 import { useTyphoon } from '@/hooks/useTyphoon';
@@ -77,10 +78,10 @@ export default function SuspectPage({ params }: SuspectPageProps) {
 
     // Load saved conversation when component mounts
     useEffect(() => {
-        if (suspectId && gameState.suspectInterviews[suspectId]) {
+        if (suspectId && gameState?.suspectInterviews?.[suspectId]) {
             setConversation(gameState.suspectInterviews[suspectId]);
         }
-    }, [suspectId, gameState.suspectInterviews]);
+    }, [suspectId, gameState?.suspectInterviews]);
 
     // Set the suspect as interviewed when the page loads
     useEffect(() => {
@@ -125,7 +126,7 @@ export default function SuspectPage({ params }: SuspectPageProps) {
             // Add the question to conversation immediately with loading state
             const newQuestionEntry = { question, answer: '...', isCustom };
             const updatedConversation = [...conversation, newQuestionEntry];
-            
+
             setConversation(updatedConversation);
 
             // Prepare the prompt for the LLM
@@ -157,19 +158,19 @@ Answer as the suspect would, using natural language and appropriate demeanor. Ma
 
             // Update the conversation with the actual response
             setConversation(current => {
-                const updatedConversation = current.map((item, i) => 
+                const updatedConversation = current.map((item, i) =>
                     i === current.length - 1 ? { ...item, answer: response } : item
                 );
-                
+
                 // Save the conversation to the global state
                 dispatch({
                     type: 'SAVE_SUSPECT_INTERVIEW',
-                    payload: { 
-                        suspectId: suspect.id, 
+                    payload: {
+                        suspectId: suspect.id,
                         conversation: updatedConversation
                     }
                 });
-                
+
                 return updatedConversation;
             });
         } catch (error) {
@@ -179,23 +180,23 @@ Answer as the suspect would, using natural language and appropriate demeanor. Ma
             const errorMessage = language === 'en'
                 ? 'Sorry, I couldn\'t process that question. Please try again.'
                 : 'ขออภัย ไม่สามารถประมวลผลคำถามได้ กรุณาลองอีกครั้ง';
-            
+
             // Use the updated conversation that includes the question
             setConversation(prev => {
                 const errorConversation = [...prev];
                 if (errorConversation.length > 0) {
                     errorConversation[errorConversation.length - 1].answer = errorMessage;
                 }
-                
+
                 // Still save the error response to global state
                 dispatch({
                     type: 'SAVE_SUSPECT_INTERVIEW',
-                    payload: { 
-                        suspectId: suspect.id, 
+                    payload: {
+                        suspectId: suspect.id,
                         conversation: errorConversation
                     }
                 });
-                
+
                 return errorConversation;
             });
         } finally {
@@ -213,11 +214,10 @@ Answer as the suspect would, using natural language and appropriate demeanor. Ma
 
     return (
         <Layout title={suspect.name}>
-            <div className="mb-8">
-                {/* Suspect header */}
-                <div className="flex items-center mb-6">
+            <div className="mb-4">
+                <div className="flex items-center mb-4">
                     <button
-                        onClick={() => router.back()}
+                        onClick={() => router.push(`/cases/${suspect.caseId}`)}
                         className="mr-4 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
                     >
                         <FaArrowLeft />
@@ -225,174 +225,178 @@ Answer as the suspect would, using natural language and appropriate demeanor. Ma
                     <h1 className="text-2xl font-bold">{suspect.name}</h1>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Suspect details */}
-                    <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-                        {/* Suspect image and basic info */}
-                        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                            <div className="flex flex-col sm:flex-row gap-6">
-                                {suspect.imageUrl ? (
-                                    <div className="w-32 h-32 rounded-full overflow-hidden relative flex-shrink-0 mx-auto sm:mx-0">
-                                        <Image
-                                            src={suspect.imageUrl}
-                                            alt={suspect.name}
-                                            fill
-                                            className="object-cover"
-                                        />
-                                    </div>
-                                ) : (
-                                    <div className="w-32 h-32 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 mx-auto sm:mx-0">
-                                        <FaUserTie size={48} className="text-gray-400 dark:text-gray-500" />
-                                    </div>
-                                )}
+                <AIDisclaimer className="mb-4" />
 
-                                <div className="flex-1">
-                                    <h2 className="text-xl font-semibold">{suspect.name}</h2>
-                                    <p className="text-gray-600 dark:text-gray-400 mt-1 mb-4">{suspect.description}</p>
-
-                                    <div className="flex flex-wrap gap-2">
-                                        <span className="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-xs">
-                                            {caseData.title}
-                                        </span>
-                                        <span className={`px-3 py-1 rounded-full text-xs ${isInterviewed
-                                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                                            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                                            }`}>
-                                            {isInterviewed ? 'Interviewed' : 'Not Interviewed'}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Interview section */}
-                        <div className="p-6">
-                            <h2 className="text-xl font-semibold mb-4">Interview</h2>
-
-                            {/* Conversation history */}
-                            <div className="space-y-6 mb-8">
-                                {conversation.length === 0 ? (
-                                    <div className="text-center py-6 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                                        <FaComment size={32} className="mx-auto mb-2 text-gray-400 dark:text-gray-500" />
-                                        <p className="text-gray-600 dark:text-gray-400">
-                                            {language === 'en' 
-                                                ? 'Start asking questions to interview the suspect.' 
-                                                : 'เริ่มถามคำถามเพื่อสัมภาษณ์ผู้ต้องสงสัย'}
-                                        </p>
-                                    </div>
-                                ) : (
-                                    conversation.map((item, index) => (
-                                        <div key={index} className="bg-gray-100 dark:bg-gray-700 rounded-lg p-4">
-                                            <div className="mb-3">
-                                                <div className="font-medium text-accent mb-1 flex items-center">
-                                                    <FaQuestionCircle className="mr-2" /> {language === 'en' ? 'You' : 'คุณ'}
-                                                </div>
-                                                <p className="text-sm">{item.question}</p>
-                                            </div>
-                                            <div>
-                                                <div className="font-medium mb-1 flex items-center">
-                                                    <FaUserTie className="mr-2" /> {suspect.name}
-                                                </div>
-                                                <p className="text-sm whitespace-pre-wrap">
-                                                    {item.answer === '...' ? (
-                                                        <span className="flex items-center text-gray-500">
-                                                            <FaEllipsisH className="animate-pulse mr-2" /> 
-                                                            {language === 'en' ? 'Thinking...' : 'กำลังคิด...'}
-                                                        </span>
-                                                    ) : (
-                                                        item.answer
-                                                    )}
-                                                </p>
-                                            </div>
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        {/* Suspect details */}
+                        <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                            {/* Suspect image and basic info */}
+                            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                                <div className="flex flex-col sm:flex-row gap-6">
+                                    {suspect.imageUrl ? (
+                                        <div className="w-32 h-32 rounded-full overflow-hidden relative flex-shrink-0 mx-auto sm:mx-0">
+                                            <Image
+                                                src={suspect.imageUrl}
+                                                alt={suspect.name}
+                                                fill
+                                                className="object-cover"
+                                            />
                                         </div>
-                                    ))
-                                )}
-                            </div>
+                                    ) : (
+                                        <div className="w-32 h-32 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 mx-auto sm:mx-0">
+                                            <FaUserTie size={48} className="text-gray-400 dark:text-gray-500" />
+                                        </div>
+                                    )}
 
-                            {/* Ask a custom question */}
-                            <form onSubmit={handleSubmitCustomQuestion} className="mb-6">
-                                <label htmlFor="custom-question" className="block text-sm font-medium mb-2">
-                                    {language === 'en' ? 'Ask a custom question' : 'ถามคำถามอื่นๆ'}
-                                </label>
-                                <div className="flex gap-2">
-                                    <input
-                                        id="custom-question"
-                                        type="text"
-                                        value={customQuestion}
-                                        onChange={(e) => setCustomQuestion(e.target.value)}
-                                        placeholder={language === 'en' ? "Type your question..." : "พิมพ์คำถามของคุณ..."}
-                                        className="flex-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-transparent"
-                                        disabled={isAsking}
-                                    />
-                                    <Button
-                                        type="submit"
-                                        variant="primary"
-                                        isDisabled={!customQuestion.trim() || isAsking}
-                                        isLoading={isAsking}
-                                    >
-                                        <span className="comic-text">{language === 'en' ? 'Ask' : 'ถาม'}</span>
-                                    </Button>
-                                </div>
-                            </form>
+                                    <div className="flex-1">
+                                        <h2 className="text-xl font-semibold">{suspect.name}</h2>
+                                        <p className="text-gray-600 dark:text-gray-400 mt-1 mb-4">{suspect.description}</p>
 
-                            {/* Predefined questions */}
-                            {predefinedQuestions.length > 0 && (
-                                <div>
-                                    <h3 className="text-sm font-medium mb-2">
-                                        {language === 'en' ? 'Suggested Questions' : 'คำถามที่แนะนำ'}
-                                    </h3>
-                                    <div className="space-y-2">
-                                        {predefinedQuestions.map((question, index) => (
-                                            <div
-                                                key={index}
-                                                className="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
-                                                onClick={() => handleAskQuestion(question)}
-                                            >
-                                                <div className="flex justify-between items-center">
-                                                    <span className="text-sm">{question}</span>
-                                                    <FaChevronRight size={12} />
-                                                </div>
-                                            </div>
-                                        ))}
+                                        <div className="flex flex-wrap gap-2">
+                                            <span className="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-xs">
+                                                {caseData.title}
+                                            </span>
+                                            <span className={`px-3 py-1 rounded-full text-xs ${isInterviewed
+                                                ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                                                : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                                                }`}>
+                                                {isInterviewed ? 'Interviewed' : 'Not Interviewed'}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
-                            )}
+                            </div>
+
+                            {/* Interview section */}
+                            <div className="p-6">
+                                <h2 className="text-xl font-semibold mb-4">Interview</h2>
+
+                                {/* Conversation history */}
+                                <div className="space-y-6 mb-8">
+                                    {conversation.length === 0 ? (
+                                        <div className="text-center py-6 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                                            <FaComment size={32} className="mx-auto mb-2 text-gray-400 dark:text-gray-500" />
+                                            <p className="text-gray-600 dark:text-gray-400">
+                                                {language === 'en'
+                                                    ? 'Start asking questions to interview the suspect.'
+                                                    : 'เริ่มถามคำถามเพื่อสัมภาษณ์ผู้ต้องสงสัย'}
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        conversation.map((item, index) => (
+                                            <div key={index} className="bg-gray-100 dark:bg-gray-700 rounded-lg p-4">
+                                                <div className="mb-3">
+                                                    <div className="font-medium text-accent mb-1 flex items-center">
+                                                        <FaQuestionCircle className="mr-2" /> {language === 'en' ? 'You' : 'คุณ'}
+                                                    </div>
+                                                    <p className="text-sm">{item.question}</p>
+                                                </div>
+                                                <div>
+                                                    <div className="font-medium mb-1 flex items-center">
+                                                        <FaUserTie className="mr-2" /> {suspect.name}
+                                                    </div>
+                                                    <p className="text-sm whitespace-pre-wrap">
+                                                        {item.answer === '...' ? (
+                                                            <span className="flex items-center text-gray-500">
+                                                                <FaEllipsisH className="animate-pulse mr-2" />
+                                                                {language === 'en' ? 'Thinking...' : 'กำลังคิด...'}
+                                                            </span>
+                                                        ) : (
+                                                            item.answer
+                                                        )}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+
+                                {/* Ask a custom question */}
+                                <form onSubmit={handleSubmitCustomQuestion} className="mb-6">
+                                    <label htmlFor="custom-question" className="block text-sm font-medium mb-2">
+                                        {language === 'en' ? 'Ask a custom question' : 'ถามคำถามอื่นๆ'}
+                                    </label>
+                                    <div className="flex gap-2">
+                                        <input
+                                            id="custom-question"
+                                            type="text"
+                                            value={customQuestion}
+                                            onChange={(e) => setCustomQuestion(e.target.value)}
+                                            placeholder={language === 'en' ? "Type your question..." : "พิมพ์คำถามของคุณ..."}
+                                            className="flex-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-transparent"
+                                            disabled={isAsking}
+                                        />
+                                        <Button
+                                            type="submit"
+                                            variant="primary"
+                                            isDisabled={!customQuestion.trim() || isAsking}
+                                            isLoading={isAsking}
+                                        >
+                                            <span className="comic-text">{language === 'en' ? 'Ask' : 'ถาม'}</span>
+                                        </Button>
+                                    </div>
+                                </form>
+
+                                {/* Predefined questions */}
+                                {predefinedQuestions.length > 0 && (
+                                    <div>
+                                        <h3 className="text-sm font-medium mb-2">
+                                            {language === 'en' ? 'Suggested Questions' : 'คำถามที่แนะนำ'}
+                                        </h3>
+                                        <div className="space-y-2">
+                                            {predefinedQuestions.map((question, index) => (
+                                                <div
+                                                    key={index}
+                                                    className="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
+                                                    onClick={() => handleAskQuestion(question)}
+                                                >
+                                                    <div className="flex justify-between items-center">
+                                                        <span className="text-sm">{question}</span>
+                                                        <FaChevronRight size={12} />
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                    </div>
 
-                    {/* Side information */}
-                    <div className="space-y-6">
-                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-                            <h2 className="text-xl font-semibold mb-4">Background Information</h2>
+                        {/* Side information */}
+                        <div className="space-y-6">
+                            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                                <h2 className="text-xl font-semibold mb-4">Background Information</h2>
 
-                            <div className="mb-4">
-                                <h3 className="font-medium mb-1">Background</h3>
-                                <p className="text-sm whitespace-pre-wrap">{suspect.background}</p>
+                                <div className="mb-4">
+                                    <h3 className="font-medium mb-1">Background</h3>
+                                    <p className="text-sm whitespace-pre-wrap">{suspect.background}</p>
+                                </div>
+
+                                <div className="mb-4">
+                                    <h3 className="font-medium mb-1">Alibi</h3>
+                                    <p className="text-sm whitespace-pre-wrap">{suspect.alibi}</p>
+                                </div>
+
+                                <div className="mb-4">
+                                    <h3 className="font-medium mb-1">Possible Motive</h3>
+                                    <p className="text-sm whitespace-pre-wrap">{suspect.motive}</p>
+                                </div>
                             </div>
 
-                            <div className="mb-4">
-                                <h3 className="font-medium mb-1">Alibi</h3>
-                                <p className="text-sm whitespace-pre-wrap">{suspect.alibi}</p>
-                            </div>
+                            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                                <h2 className="text-xl font-semibold mb-4">Case Context</h2>
+                                <h3 className="font-medium mb-2">{caseData.title}</h3>
+                                <p className="text-sm mb-4">{caseData.summary}</p>
 
-                            <div className="mb-4">
-                                <h3 className="font-medium mb-1">Possible Motive</h3>
-                                <p className="text-sm whitespace-pre-wrap">{suspect.motive}</p>
-                            </div>
-                        </div>
-
-                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-                            <h2 className="text-xl font-semibold mb-4">Case Context</h2>
-                            <h3 className="font-medium mb-2">{caseData.title}</h3>
-                            <p className="text-sm mb-4">{caseData.summary}</p>
-
-                            <div
-                                className="rounded p-3 mb-2 text-sm cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
-                                onClick={() => router.push(`/cases/${caseData.id}`)}
-                            >
-                                <div className="flex justify-between items-center">
-                                    <span className="comic-text">Back to case</span>
-                                    <FaChevronRight size={12} />
+                                <div
+                                    className="rounded p-3 mb-2 text-sm cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                                    onClick={() => router.push(`/cases/${caseData.id}`)}
+                                >
+                                    <div className="flex justify-between items-center">
+                                        <span className="comic-text">Back to case</span>
+                                        <FaChevronRight size={12} />
+                                    </div>
                                 </div>
                             </div>
                         </div>
