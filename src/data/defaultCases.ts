@@ -48,7 +48,7 @@ export const defaultClues: Clue[] = [
         discovered: true,
         examined: false,
         relevance: 'critical',
-        imageUrl: '/clue.svg'
+        imageUrl: '/clue.png'
     },
     {
         id: 'clue-001-2',
@@ -60,7 +60,7 @@ export const defaultClues: Clue[] = [
         discovered: true,
         examined: false,
         relevance: 'important',
-        imageUrl: '/clue.svg'
+        imageUrl: '/clue.png'
     },
     {
         id: 'clue-001-3',
@@ -72,7 +72,7 @@ export const defaultClues: Clue[] = [
         discovered: true,
         examined: false,
         relevance: 'important',
-        imageUrl: '/clue.svg'
+        imageUrl: '/clue.png'
     },
 
     // Case 002: Vanishing Act
@@ -86,7 +86,7 @@ export const defaultClues: Clue[] = [
         discovered: true,
         examined: false,
         relevance: 'critical',
-        imageUrl: '/clue.svg'
+        imageUrl: '/clue.png'
     },
     {
         id: 'clue-002-2',
@@ -98,7 +98,7 @@ export const defaultClues: Clue[] = [
         discovered: true,
         examined: false,
         relevance: 'important',
-        imageUrl: '/clue.svg'
+        imageUrl: '/clue.png'
     },
 
     // Case 003: The Poisoned Pen
@@ -112,7 +112,7 @@ export const defaultClues: Clue[] = [
         discovered: true,
         examined: false,
         relevance: 'critical',
-        imageUrl: '/clue.svg'
+        imageUrl: '/clue.png'
     },
     {
         id: 'clue-003-2',
@@ -124,7 +124,7 @@ export const defaultClues: Clue[] = [
         discovered: true,
         examined: false,
         relevance: 'important',
-        imageUrl: '/clue.svg'
+        imageUrl: '/clue.png'
     },
     {
         id: 'clue-003-3',
@@ -136,7 +136,7 @@ export const defaultClues: Clue[] = [
         discovered: true,
         examined: false,
         relevance: 'critical',
-        imageUrl: '/clue.svg'
+        imageUrl: '/clue.png'
     }
 ];
 
@@ -152,7 +152,7 @@ export const defaultSuspects: Suspect[] = [
         alibi: 'Claims he was at home with food poisoning. No witnesses can confirm this.',
         isGuilty: false,
         interviewed: false,
-        imageUrl: '/suspect.svg'
+        imageUrl: '/suspect.png'
     },
     {
         id: 'suspect-001-2',
@@ -164,7 +164,7 @@ export const defaultSuspects: Suspect[] = [
         alibi: 'Claims she was at a hotel bar during the time of the theft. Bartender confirms seeing her, but there\'s a 20-minute gap where she left to "take a call".',
         isGuilty: true,
         interviewed: false,
-        imageUrl: '/suspect.svg'
+        imageUrl: '/suspect.png'
     },
     {
         id: 'suspect-001-3',
@@ -176,7 +176,7 @@ export const defaultSuspects: Suspect[] = [
         alibi: 'Was attending a fundraising dinner across town. Multiple witnesses confirm his presence, though he left early claiming a headache.',
         isGuilty: false,
         interviewed: false,
-        imageUrl: '/suspect.svg'
+        imageUrl: '/suspect.png'
     },
 
     // Case 002: Vanishing Act
@@ -190,7 +190,7 @@ export const defaultSuspects: Suspect[] = [
         alibi: 'Claims he was watching the show from the audience. Several attendees confirm seeing him, but he left his seat for approximately 15 minutes during intermission.',
         isGuilty: true,
         interviewed: false,
-        imageUrl: '/suspect.svg'
+        imageUrl: '/suspect.png'
     },
     {
         id: 'suspect-002-2',
@@ -202,7 +202,7 @@ export const defaultSuspects: Suspect[] = [
         alibi: 'Was on stage during the performance and visibly distressed when Lorenzo didn\'t emerge from the tank.',
         isGuilty: false,
         interviewed: false,
-        imageUrl: '/suspect.svg'
+        imageUrl: '/suspect.png'
     },
     {
         id: 'suspect-002-3',
@@ -214,7 +214,7 @@ export const defaultSuspects: Suspect[] = [
         alibi: 'Was operating lighting during the show. Colleagues confirm he was at his post, but the lighting booth has a clear view and access to the backstage area.',
         isGuilty: false,
         interviewed: false,
-        imageUrl: '/suspect.svg'
+        imageUrl: '/suspect.png'
     },
 
     // Case 003: The Poisoned Pen
@@ -228,7 +228,7 @@ export const defaultSuspects: Suspect[] = [
         alibi: 'Was at a publishing industry dinner across town. Numerous witnesses confirm, but he stepped out "to make calls" several times.',
         isGuilty: false,
         interviewed: false,
-        imageUrl: '/suspect.svg'
+        imageUrl: '/suspect.png'
     },
     {
         id: 'suspect-003-2',
@@ -240,7 +240,7 @@ export const defaultSuspects: Suspect[] = [
         alibi: 'Claims she was working late at her university laboratory. Security logs confirm she was in the building, but she could have left and returned unnoticed.',
         isGuilty: true,
         interviewed: false,
-        imageUrl: '/suspect.svg'
+        imageUrl: '/suspect.png'
     },
     {
         id: 'suspect-003-3',
@@ -252,6 +252,6 @@ export const defaultSuspects: Suspect[] = [
         alibi: 'Claims he was at home alone watching TV. Neighbor saw his car in the driveway, but cannot confirm he was actually inside the house.',
         isGuilty: false,
         interviewed: false,
-        imageUrl: '/suspect.svg'
+        imageUrl: '/suspect.png'
     }
 ]; 

@@ -9,7 +9,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useGame } from '@/contexts/GameContext';
 import { FiArrowLeft, FiCheck } from 'react-icons/fi';
 import { FaSearch } from 'react-icons/fa';
-
+import Image from 'next/image';
 interface ScenePageProps {
     params: Promise<{
         id: string;
@@ -108,7 +108,7 @@ export default function ScenePage({ params }: ScenePageProps) {
             type: 'DISCOVER_CLUE',
             payload: clueId
         });
-        
+
         // Also mark it as examined so it counts toward solving the case progress
         dispatch({
             type: 'EXAMINE_CLUE',
@@ -152,33 +152,32 @@ export default function ScenePage({ params }: ScenePageProps) {
                         <div className="absolute inset-0 bg-gradient-to-br from-primary-900/70 to-accent-900/70">
                             {/* Room outline */}
                             <div className="absolute inset-10 border-2 border-white/30"></div>
-                            
+
                             {/* Floor pattern */}
                             <div className="absolute inset-10 bg-surface-800/50">
-                                <svg className="absolute inset-0 w-full h-full opacity-30" xmlns="http://www.w3.org/2000/svg">
-                                    <pattern id="floorpattern" patternUnits="userSpaceOnUse" width="50" height="50">
-                                        <path d="M 0 0 L 50 50" stroke="white" strokeWidth="0.5" fill="none" />
-                                        <path d="M 50 0 L 0 50" stroke="white" strokeWidth="0.5" fill="none" />
-                                    </pattern>
-                                    <rect width="100%" height="100%" fill="url(#floorpattern)" />
-                                </svg>
+                                <Image
+                                    src="/floor.png"
+                                    alt="Floor pattern"
+                                    fill
+                                    className="object-cover opacity-30"
+                                />
                             </div>
-                            
+
                             {/* Windows */}
                             <div className="absolute top-10 right-10 w-1/4 h-8 border-2 border-white/60 bg-blue-900/30"></div>
-                            
+
                             {/* Furniture */}
                             {/* Desk */}
                             <div className="absolute" style={{ left: '25%', top: '30%', width: '15%', height: '10%', transform: 'translate(-50%, -50%)' }}>
                                 <div className="absolute inset-0 bg-yellow-800/60 border border-white/50"></div>
                                 <div className="absolute inset-y-0 left-1/2 right-0 bg-yellow-900/60 border-l border-white/50"></div>
                             </div>
-                            
+
                             {/* Table */}
-                            <div className="absolute rounded-full bg-amber-800/60 border border-white/50" 
+                            <div className="absolute rounded-full bg-amber-800/60 border border-white/50"
                                 style={{ left: '35%', top: '55%', width: '12%', height: '8%', transform: 'translate(-50%, -50%)' }}>
                             </div>
-                            
+
                             {/* Bookshelf */}
                             <div className="absolute" style={{ left: '85%', top: '50%', width: '8%', height: '20%', transform: 'translate(-50%, -50%)' }}>
                                 <div className="absolute inset-0 bg-indigo-900/60 border border-white/50"></div>
@@ -186,14 +185,14 @@ export default function ScenePage({ params }: ScenePageProps) {
                                 <div className="absolute top-2/4 inset-x-0 border-t border-white/30"></div>
                                 <div className="absolute top-3/4 inset-x-0 border-t border-white/30"></div>
                             </div>
-                            
+
                             {/* Floor marking */}
                             <div className="absolute" style={{ left: '50%', top: '70%', width: '15%', height: '10%', transform: 'translate(-50%, -50%)' }}>
                                 <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full">
                                     <path d="M 10,10 L 90,10 L 90,90 L 10,90 Z" stroke="white" strokeWidth="2" fill="none" strokeDasharray="5,5" />
                                 </svg>
                             </div>
-                            
+
                             {/* Decorative crime scene elements */}
                             <svg className="absolute inset-0 w-full h-full opacity-20" xmlns="http://www.w3.org/2000/svg">
                                 <pattern id="crimescene" patternUnits="userSpaceOnUse" width="100" height="100" patternTransform="rotate(45)">
@@ -202,7 +201,7 @@ export default function ScenePage({ params }: ScenePageProps) {
                                 </pattern>
                                 <rect width="100%" height="100%" fill="url(#crimescene)" />
                             </svg>
-                            
+
                             {/* Crime scene tape borders */}
                             <div className="absolute top-0 left-0 right-0 h-8 bg-yellow-400 flex items-center justify-center transform -rotate-2 border-y-2 border-black">
                                 <div className="text-black font-black text-xs tracking-wider whitespace-nowrap overflow-hidden">
@@ -219,13 +218,13 @@ export default function ScenePage({ params }: ScenePageProps) {
 
                     {/* Location Name Overlays */}
                     {hotspots.map(hotspot => (
-                        <div 
+                        <div
                             key={`label-${hotspot.id}`}
                             className="absolute text-xs font-bold bg-black/50 text-white px-2 py-1 rounded transform -translate-x-1/2"
-                            style={{ 
-                                left: `${hotspot.x}%`, 
+                            style={{
+                                left: `${hotspot.x}%`,
                                 top: `${hotspot.y + 8}%`,
-                                opacity: activeHotspot === hotspot.id ? 1 : 0.7 
+                                opacity: activeHotspot === hotspot.id ? 1 : 0.7
                             }}
                         >
                             {hotspot.name}
@@ -310,8 +309,8 @@ export default function ScenePage({ params }: ScenePageProps) {
                                     <span className="font-semibold">{t('scene.found_clue')}</span>
                                 </div>
                                 <p className="mb-4">{t('scene.clue_description')}</p>
-                                <p className="mb-4 italic">Look for 
-                                    <span className="font-semibold text-accent"> {objectLocations[activeHotspot].find(obj => obj.clueId === discoveredClue)?.name} </span> 
+                                <p className="mb-4 italic">Look for
+                                    <span className="font-semibold text-accent"> {objectLocations[activeHotspot].find(obj => obj.clueId === discoveredClue)?.name} </span>
                                     in this area.</p>
                                 <Button
                                     variant="accent"
@@ -325,7 +324,7 @@ export default function ScenePage({ params }: ScenePageProps) {
                         ) : (
                             <div>
                                 <p className="text-surface-600 dark:text-surface-300 mb-4">
-                                    {objectLocations[activeHotspot]?.length > 0 ? 
+                                    {objectLocations[activeHotspot]?.length > 0 ?
                                         `This area might contain evidence. Look for objects and click on them to investigate.` :
                                         t('scene.nothing_found')
                                     }
