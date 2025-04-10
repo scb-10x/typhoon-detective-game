@@ -1,28 +1,24 @@
-# Detective Game
+# Typhoon Detective Game
 
-An interactive detective game built with Next.js, React, and Typhoon AI integration.
+## Introduction
 
-## Features
+[Typhoon Detective Game](https://detective.apps.opentyphoon.ai) is an interactive mystery-solving experience where players take on the role of a detective to solve dynamically generated cases. Through examining evidence, interviewing suspects, and piecing together clues, players must identify the culprit and solve the mystery.
 
-- LLM-powered detective game experience
-- Dynamic case generation based on user preferences
-- Clue collection and examination system
-- Interactive suspect interviews
-- Multiple language support (English & Thai)
-- Responsive design for desktop and mobile
-- Dark/light mode support
+This project is part of [Typhoon Application Week](https://apps.opentyphoon.ai), showcasing the capabilities of the [Typhoon platform](https://opentyphoon.ai). Please note that this application is not maintained for production use and is not production-ready. Use at your own risk.
 
-## Tech Stack
+## Highlighted Features + Typhoon Integration
 
-- **Framework**: Next.js 15
-- **UI**: React 19, Tailwind CSS 4
-- **AI Integration**: Typhoon API (models: typhoon-v2.1-12b-instruct and typhoon-v2-r1-70b-preview)
-- **Package Manager**: pnpm
-- **Styling**: Tailwind CSS
-- **Icons**: React Icons
-- **Markdown**: React Markdown
+- **Dynamic Case Generation**: Typhoon creates unique cases with customizable settings, themes, and difficulties, generating complex plots, motives, and characters on demand.
 
-## Getting Started
+- **Interactive Suspect Interviews**: Leverage Typhoon's conversational abilities to question suspects naturally, with the AI generating context-aware responses based on the case details and suspect personalities.
+
+- **Evidence Analysis**: Typhoon powers the evidence examination system, providing insights and connections between clues that help players build their case.
+
+- **Multiple Language Support**: Typhoon's multilingual capabilities enable gameplay in both English and Thai with natural, fluent interactions.
+
+- **Adaptive Difficulty**: Typhoon adjusts the complexity of cases and hints based on player performance and selected difficulty level.
+
+## Getting Started (Local Development)
 
 ### Prerequisites
 
@@ -34,8 +30,8 @@ An interactive detective game built with Next.js, React, and Typhoon AI integrat
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/detective-game.git
-   cd detective-game
+   git clone https://github.com/yourusername/typhoon-detective-game.git
+   cd typhoon-detective-game
    ```
 
 2. Install dependencies:
@@ -44,11 +40,10 @@ An interactive detective game built with Next.js, React, and Typhoon AI integrat
    ```
 
 3. Set up environment variables:
-   - Copy `.env.local` file and add your Typhoon API key:
+   - Copy `.env.example` to `.env.local` and add your Typhoon API key:
    ```
    TYPHOON_API_KEY=your_api_key_here
    ```
-   - The API key is only accessed server-side for security.
 
 4. Run the development server:
    ```bash
@@ -57,35 +52,14 @@ An interactive detective game built with Next.js, React, and Typhoon AI integrat
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Game Mechanics
-
-- **Case Generation**: Create new cases with different difficulties, themes, and settings
-- **Evidence Collection**: Discover and examine clues to build your case
-- **Suspect Interviews**: Question suspects using the LLM to generate realistic responses
-- **Case Solving**: Present your theory about the culprit and the evidence
-
-## Project Structure
-
-- `src/app` - Next.js app router pages
-- `src/components` - Reusable UI components
-- `src/contexts` - React contexts for state management
-- `src/hooks` - Custom React hooks
-- `src/lib` - Utility functions and AI integration
-- `src/types` - TypeScript type definitions
-
-## Deployment
-
-The application can be deployed to Vercel:
-
-```bash
-pnpm build
-```
-
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the [MIT License](https://opensource.org/licenses/MIT) - see the LICENSE file for details.
 
-## Acknowledgments
+## Connect With Us
 
-- Typhoon API for providing the language model integration
-- Next.js team for the excellent framework
+- Website: [Typhoon](https://opentyphoon.ai)
+- GitHub: [SCB 10X](https://github.com/scb-10x)
+- Hugging Face: [SCB 10X](https://huggingface.co/scb10x)
+- Discord: [Join our community](https://discord.com/invite/9F6nrFXyNt)
+- X (formerly Twitter): [Typhoon](https://x.com/opentyphoon)
