@@ -125,7 +125,7 @@ export async function generateCase(params: CaseGenerationParams): Promise<Genera
                     messages,
                     model: 'typhoon-v2-r1-70b-preview',
                     temperature: 0.7,
-                    max_tokens: 4000
+                    max_tokens: 8192
                 }),
             });
 
@@ -143,7 +143,7 @@ export async function generateCase(params: CaseGenerationParams): Promise<Genera
                 messages,
                 'typhoon-v2-r1-70b-preview',
                 0.7,
-                4096
+                8192
             );
         }
 
