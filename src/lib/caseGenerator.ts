@@ -197,7 +197,7 @@ function formatGeneratedCase(data: unknown, _language: 'en' | 'th'): GeneratedCa
             ((data as any)?.case_details?.date ?
                 new Date(`${(data as any)?.case_details?.date} ${(data as any)?.case_details?.time || '00:00'}`).toISOString() :
                 (data as any)?.dateTime || new Date().toISOString()),
-        imageUrl: `https://picsum.photos/seed/mystery/800/600`,
+        imageUrl: `/case-file.png`,
         isLLMGenerated: true
     };
 
