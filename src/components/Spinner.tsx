@@ -2,11 +2,15 @@ import React from 'react';
 
 interface SpinnerProps {
     className?: string;
+    gtmId?: string;
 }
 
-export function Spinner({ className = '' }: SpinnerProps) {
+export function Spinner({ className = '', gtmId }: SpinnerProps) {
     return (
-        <div className="relative inline-block">
+        <div
+            className="relative inline-block"
+            data-gtm-id={gtmId || "spinner"}
+        >
             <svg
                 className={`animate-spin ${className}`}
                 xmlns="http://www.w3.org/2000/svg"

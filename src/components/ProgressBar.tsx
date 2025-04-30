@@ -8,6 +8,7 @@ interface ProgressBarProps {
     showSteps?: boolean;
     size?: 'sm' | 'md' | 'lg';
     className?: string;
+    gtmId?: string;
 }
 
 export default function ProgressBar({
@@ -15,7 +16,8 @@ export default function ProgressBar({
     showText = false,
     showSteps = false,
     size = 'md',
-    className = ''
+    className = '',
+    gtmId,
 }: ProgressBarProps) {
     const { t } = useLanguage();
 
@@ -43,7 +45,7 @@ export default function ProgressBar({
     };
 
     return (
-        <div className={`w-full ${className}`}>
+        <div className={`relative ${className}`} data-gtm-id={gtmId || "progress-bar"}>
             {/* Step markers */}
             {showSteps && (
                 <div className="mt-3 flex justify-between items-center px-1">
@@ -104,14 +106,15 @@ export default function ProgressBar({
                     </div>
                 </div>
             )}
-            
+
             {/* Main progress bar */}
-            <div className={`w-full bg-surface-800 ${heights[size]} overflow-hidden relative border-2 border-black`}>
+            <div className={`w-full bg-surface-800 ${heights[size]} overflow-hidden relative border-2 border-black`} data-gtm-id={gtmId ? `${gtmId}-container` : "progress-bar-container"}>
                 <motion.div
                     className="bg-yellow-500 from-yellow-300 to-yellow-500 h-full relative z-999 shadow-[0_0_8px_rgba(255,204,0,0.8)]"
                     initial={{ width: 0 }}
                     animate={{ width: `${progress}%` }}
                     transition={{ duration: 0.5, ease: "easeOut" }}
+                    data-gtm-id={gtmId ? `${gtmId}-fill` : "progress-bar-fill"}
                 />
             </div>
 

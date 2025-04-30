@@ -11,6 +11,7 @@ interface ButtonProps {
     fullWidth?: boolean;
     type?: 'button' | 'submit' | 'reset';
     className?: string;
+    gtmId?: string;
 }
 
 export default function Button({
@@ -23,6 +24,7 @@ export default function Button({
     fullWidth = false,
     type = 'button',
     className = '',
+    gtmId,
 }: ButtonProps) {
     const { t } = useLanguage();
 
@@ -65,6 +67,7 @@ export default function Button({
             onClick={onClick}
             {...disabledProps}
             aria-disabled={isDisabled}
+            data-gtm-id={gtmId || `btn-${variant}-${size}`}
         >
             {isLoading ? (
                 <>
