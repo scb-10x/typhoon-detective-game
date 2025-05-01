@@ -12,6 +12,7 @@ interface CardProps {
     discovered?: boolean;
     children?: React.ReactNode;
     className?: string;
+    gtmId?: string;
 }
 
 export default function Card({
@@ -24,6 +25,7 @@ export default function Card({
     discovered = false,
     children,
     className = '',
+    gtmId,
 }: CardProps) {
     const baseClasses = 'borderlands-panel rounded-lg transition-all duration-200 h-full flex flex-col';
 
@@ -45,6 +47,7 @@ export default function Card({
             onClick={onClick}
             role={onClick ? 'button' : undefined}
             tabIndex={onClick ? 0 : undefined}
+            data-gtm-id={gtmId || `card-${title.replace(/\s+/g, '-').toLowerCase()}`}
         >
             {/* Card image with polaroid-style */}
             <div className="relative w-full h-48 bg-surface-900 p-3">

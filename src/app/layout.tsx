@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   publisher: "Typhoon AI",
   applicationName: "Typhoon Detective Game",
   generator: "Next.js",
-  metadataBase: new URL("https://detective-game.opentyphoon.ai"),
+  metadataBase: new URL("https://detective.apps.opentyphoon.ai"),
   alternates: {
     canonical: "/",
     languages: {
@@ -43,11 +43,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Typhoon Detective Game | LLM-Powered Interactive Experience",
     description: "Experience the power of Typhoon AI in this interactive detective game. Solve mysteries with AI-generated cases, intelligent clue analysis, and realistic suspect interviews.",
-    url: "https://detective-game.opentyphoon.ai",
+    url: "https://detective.apps.opentyphoon.ai",
     siteName: "Typhoon Detective Game",
     images: [
       {
-        url: "/og-image.jpg",
+        url: "/og.jpg",
         width: 1200,
         height: 630,
         alt: "Typhoon Detective Game - Powered by Typhoon AI",
@@ -60,7 +60,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Typhoon Detective Game | AI-Powered Detective Experience",
     description: "Solve mysteries with AI-generated cases, intelligent clue analysis, and realistic suspect interviews. A showcase of Typhoon's AI capabilities.",
-    images: ["/twitter-image.jpg"],
+    images: ["/og.jpg"],
     creator: "@TyphoonAI",
     site: "@TyphoonAI",
   },
@@ -120,9 +120,9 @@ export default function RootLayout({
                 "url": "https://opentyphoon.ai"
               },
               "operatingSystem": "Web browser",
-              "url": "https://detective-game.opentyphoon.ai",
+              "url": "https://detective.apps.opentyphoon.ai",
               "softwareVersion": "1.0.0",
-              "screenshot": "/og-image.jpg",
+              "screenshot": "/og.jpg",
               "featureList": [
                 "AI-generated detective cases",
                 "Dynamic suspect interviews",

@@ -3,11 +3,15 @@ import { FaRobot } from 'react-icons/fa6';
 
 interface AIDisclaimerProps {
     className?: string;
+    gtmId?: string;
 }
 
-export default function AIDisclaimer({ className = '' }: AIDisclaimerProps) {
+export default function AIDisclaimer({ className = '', gtmId }: AIDisclaimerProps) {
     return (
-        <div className={`text-xs bg-surface-800/80 border border-surface-700 rounded-md p-3 ${className}`}>
+        <div
+            className={`text-xs bg-surface-800/80 border border-surface-700 rounded-md p-3 ${className}`}
+            data-gtm-id={gtmId || "ai-disclaimer"}
+        >
             <div className="flex items-start">
                 <FaRobot className="text-gray-400 mt-1 mr-2 flex-shrink-0" />
                 <p className="text-gray-400">

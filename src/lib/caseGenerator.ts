@@ -125,7 +125,7 @@ export async function generateCase(params: CaseGenerationParams): Promise<Genera
                     messages,
                     model: 'typhoon-v2-r1-70b-preview',
                     temperature: 0.7,
-                    max_tokens: 4000
+                    max_tokens: 8192
                 }),
             });
 
@@ -143,7 +143,7 @@ export async function generateCase(params: CaseGenerationParams): Promise<Genera
                 messages,
                 'typhoon-v2-r1-70b-preview',
                 0.7,
-                4096
+                8192
             );
         }
 
@@ -187,28 +187,32 @@ function formatGeneratedCase(data: unknown, _language: 'en' | 'th'): GeneratedCa
     // Extract and format case data
     const caseData: Case = {
         id: uuidv4(),
-        title: (data as any)?.case?.title || (data as any)?.title || 'Untitled Case',
-        description: (data as any)?.case?.description || (data as any)?.description || '',
-        summary: (data as any)?.case?.summary || (data as any)?.summary || '',
+        title: (data as any)?.case?.title || (data as any)?.case_details?.title || (data as any)?.title || 'Untitled Case',
+        description: (data as any)?.case?.description || (data as any)?.case_details?.synopsis || (data as any)?.description || '',
+        summary: (data as any)?.case?.summary || (data as any)?.case_details?.synopsis || (data as any)?.summary || '',
         difficulty: (data as any)?.case?.difficulty || 'medium',
         solved: false,
-        location: (data as any)?.case?.location || (data as any)?.location || '',
-        dateTime: (data as any)?.case?.dateTime || (data as any)?.dateTime || new Date().toISOString(),
-        imageUrl: `https://picsum.photos/seed/mystery/800/600`,
+        location: (data as any)?.case?.location || (data as any)?.case_details?.location || (data as any)?.location || '',
+        dateTime: (data as any)?.case?.dateTime ||
+            ((data as any)?.case_details?.date ?
+                new Date(`${(data as any)?.case_details?.date} ${(data as any)?.case_details?.time || '00:00'}`).toISOString() :
+                (data as any)?.dateTime || new Date().toISOString()),
+        imageUrl: `/case-file.png`,
         isLLMGenerated: true
     };
 
-    // Extract and format clues
-    const clues: Clue[] = ((data as any)?.clues || []).map((clue: unknown) => ({
+    // Extract and format clues (handle both clues and evidence field names)
+    const cluesData = (data as any)?.clues || (data as any)?.evidence || [];
+    const clues: Clue[] = cluesData.map((clue: unknown) => ({
         id: uuidv4(),
         caseId: caseData.id,
-        title: (clue as any)?.title || 'Untitled Clue',
+        title: (clue as any)?.title || (clue as any)?.item || 'Untitled Clue',
         description: (clue as any)?.description || '',
-        location: (clue as any)?.location || '',
+        location: (clue as any)?.location || (clue as any)?.position_found || '',
         type: (clue as any)?.type || 'physical',
         discovered: false,
         examined: false,
-        relevance: (clue as any)?.relevance || 'important'
+        relevance: (clue as any)?.relevance || (clue as any)?.significance || 'important'
     }));
 
     // Extract and format suspects
@@ -225,23 +229,34 @@ function formatGeneratedCase(data: unknown, _language: 'en' | 'th'): GeneratedCa
     }));
 
     // Find the guilty suspect based on the solution
-    const solution = (data as any)?.solution || '';
-    if (solution && suspects.length > 0) {
-        // Try to identify the guilty suspect from the solution text
-        const guiltyName = suspects.map(s => s.name).find(name =>
-            solution.toLowerCase().includes(name.toLowerCase())
-        );
+    const solution = (data as any)?.solution?.reasoning || (data as any)?.solution || '';
+    const guiltySuspectName = (data as any)?.solution?.culprit || '';
 
-        if (guiltyName) {
-            // Mark the identified suspect as guilty
+    if (solution && suspects.length > 0) {
+        if (guiltySuspectName) {
+            // Mark the identified suspect from solution.culprit as guilty
             suspects.forEach(suspect => {
-                if (suspect.name.toLowerCase() === guiltyName.toLowerCase()) {
+                if (suspect.name.toLowerCase() === guiltySuspectName.toLowerCase()) {
                     suspect.isGuilty = true;
                 }
             });
         } else {
-            // If we can't identify by name, mark the first suspect as guilty
-            suspects[0].isGuilty = true;
+            // Try to identify the guilty suspect from the solution text
+            const guiltyName = suspects.map(s => s.name).find(name =>
+                solution.toLowerCase().includes(name.toLowerCase())
+            );
+
+            if (guiltyName) {
+                // Mark the identified suspect as guilty
+                suspects.forEach(suspect => {
+                    if (suspect.name.toLowerCase() === guiltyName.toLowerCase()) {
+                        suspect.isGuilty = true;
+                    }
+                });
+            } else {
+                // If we can't identify by name, mark the first suspect as guilty
+                suspects[0].isGuilty = true;
+            }
         }
     }
 

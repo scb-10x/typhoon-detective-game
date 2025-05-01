@@ -3,4 +3,4 @@ User-agent: *
 Allow: /
 
 # Sitemap location
-Sitemap: https://detective-game.opentyphoon.ai/sitemap.xml 
+Sitemap: https://detective.apps.opentyphoon.ai/sitemap.xml 
