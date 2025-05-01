@@ -63,6 +63,9 @@ export default function Layout({ children, title }: { children: React.ReactNode,
                         <span className="text-xs font-bold borderlands-panel px-2 py-1 bg-surface-800 rotate-2">
                             {t('app.subtitle')}
                         </span>
+                        <span className="text-xs font-bold borderlands-panel px-2 py-1 bg-red-600 -rotate-3 animate-pulse">
+                            DEMO
+                        </span>
                     </div>
 
                     <div className="flex items-center">
